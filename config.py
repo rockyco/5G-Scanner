@@ -19,7 +19,7 @@ class Config:
         """Load default configuration values"""
         return {
             'usrp': {
-                'executable_path': '/home/user/Projects/NR5G/rfnoc_detectSSB/build/apps/init_ssb_block',
+                'executable_path': '/home/user/Projects/5G-Scanner/apps/init_ssb_block',
                 'default_args': 'type=x300',
                 'default_gain': 30,
                 'default_ddc_rate': 7.68e6,
@@ -28,8 +28,8 @@ class Config:
                 'retry_attempts': 2
             },
             'paths': {
-                'data_directory': '/home/user/Projects/NR5G/AppUI/data',
-                'log_directory': '/home/user/Projects/NR5G/AppUI/logs',
+                'data_directory': '/home/user/Projects/5G-Scanner/data',
+                'log_directory': '/home/user/Projects/5G-Scanner/logs',
                 'temp_directory': '/tmp/ssb_scanner'
             },
             'scanning': {

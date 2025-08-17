@@ -10,13 +10,14 @@ A sophisticated, modular web-based application for real-time detection and analy
 
 ## ✨ Key Features
 
-- 🎯 **Real-time 5G Signal Detection** across multiple NR bands (n77, n78, n79)
+- 🎯 **Real-time 5G Signal Detection** across multiple NR bands (n1, n3, n77, n78, n79)
 - 📊 **Live Web Interface** with real-time progress monitoring and logging
 - 🔧 **Modular Architecture** with configurable parameters and paths
 - 📡 **Long-Duration Data Capture** for signal analysis and research
 - 🛡️ **Robust Error Handling** with automatic retry logic and overflow detection
 - 📈 **3GPP Compliant** GSCN frequency calculations following TS 38.104 standards
 - 🚀 **Production Ready** with comprehensive process management and cleanup
+- 🔧 **SystemD Service** support for automatic startup and monitoring
 
 ## 🏗️ Architecture Overview
 
@@ -68,8 +69,8 @@ A sophisticated, modular web-based application for real-time detection and analy
 
 ```bash
 # Clone the repository
-git clone https://github.com/rockyco/NR5G.git
-cd NR5G/AppUI
+git clone https://github.com/rockyco/5G-Scanner.git
+cd 5G-Scanner
 
 # Install Python dependencies
 pip install -r requirements.txt
@@ -80,24 +81,33 @@ chmod +x run.sh
 
 ### 2. ⚙️ Configuration
 
-Create or edit the configuration file `config.json`:
+Edit the configuration file `config.json` (auto-generated on first run):
 
 ```json
 {
   "usrp": {
-    "executable_path": "/path/to/your/init_ssb_block",
-    "default_args": "type=x300,addr=192.168.40.2",
+    "executable_path": "/home/user/Projects/5G-Scanner/apps/init_ssb_block",
+    "default_args": "type=x300",
     "default_gain": 30,
     "default_rx_sig_length": 7680000,
     "timeout_seconds": 60,
     "retry_attempts": 2
   },
   "paths": {
-    "data_directory": "/path/to/data/storage"
+    "data_directory": "/home/user/Projects/5G-Scanner/data",
+    "log_directory": "/home/user/Projects/5G-Scanner/logs",
+    "temp_directory": "/tmp/ssb_scanner"
   },
   "scanning": {
-    "max_frequencies_per_band": 50,
+    "max_frequencies_per_band": 341,
     "gscn_step_size": 1
+  },
+  "ui": {
+    "default_band": "n78",
+    "refresh_interval_ms": 1000,
+    "max_log_entries": 1000
+  }
+}
   },
   "ui": {
     "max_log_entries": 1000
@@ -173,16 +183,18 @@ http://localhost:5000
 - ✅ Real-time path existence checking
 
 ### 📊 Scanning Tab
-- 🎯 **Band Selection**: Choose from n77, n78, n79 with automatic GSCN calculation
+- 🎯 **Band Selection**: Choose from n1, n3, n77, n78, n79 with automatic GSCN calculation
 - 📈 **Real-time Progress**: Live frequency scanning with current status
 - 📋 **Live Log Display**: Color-coded status messages and error reporting
 - 🔄 **Custom Frequency Input**: Manual GSCN entry with band-specific calculations
+- 📊 **Detection Results**: Real-time display of detected SSB signals with signal strength
 
 ### 📑 Results Tab
 - 📈 **Detection Results**: Comprehensive table with GSCN, frequency, and SSB count
-- 💾 **Historical Data**: Persistent storage of detected frequencies
+- 💾 **Historical Data**: Persistent storage of detected frequencies in `data/detected_frequencies.json`
 - 📊 **Technical Details**: SCS (Subcarrier Spacing) and signal strength information
 - 📤 **Export Capabilities**: Results available for further analysis
+- 🔍 **Filter Options**: Filter by band, frequency range, or signal strength
 
 ### 📹 Data Capture Tab
 - ⏱️ **Long-Duration Recording**: Configurable capture time (minutes to hours)
@@ -203,12 +215,19 @@ http://localhost:5000
 | Endpoint | Method | Description | Parameters |
 |----------|--------|-------------|------------|
 | `/api/bands` | `GET` | Get available 5G NR bands | - |
-| `/api/gscn/<band>` | `GET` | Get GSCN frequencies for band | `band`: n77, n78, n79 |
+| `/api/gscn/<band>` | `GET` | Get GSCN frequencies for band | `band`: n1, n3, n77, n78, n79 |
 | `/api/scan/start` | `POST` | Start band scanning | `{"band": "n78", "gain": 30}` |
 | `/api/scan/stop` | `POST` | Stop current scan | - |
 | `/api/scan/single_freq` | `POST` | Test single frequency | `{"frequency": 3500000000, "gain": 30}` |
 | `/api/status` | `GET` | Get real-time scan status | - |
 | `/api/capture/start` | `POST` | Start data capture | `{"gscn": 7711, "frequency": 3.3e9, "duration_minutes": 5}` |
+| `/api/detected_frequencies` | `GET` | Get historical scan results | - |
+
+### Data Management
+| Endpoint | Method | Description | Parameters |
+|----------|--------|-------------|------------|
+| `/api/data/clear` | `POST` | Clear historical scan data | - |
+| `/api/data/export` | `GET` | Export scan results as JSON/CSV | `format`: json, csv |
 
 ### Example API Usage
 
@@ -259,33 +278,105 @@ curl -X POST http://localhost:5000/api/scan/single_freq \
 ## 📁 Project Structure
 
 ```
-📦 NR5G/AppUI/
-├── 🐍 app.py                    # Main Flask application & API routes
-├── ⚙️ config.py                 # Configuration management with JSON persistence  
-├── 📊 gscn_calculator.py        # 3GPP-compliant GSCN frequency calculations
-├── 📡 usrp_controller.py        # USRP device communication & process management
-├── 📋 config.json               # User configuration file (auto-generated)
-├── 📄 requirements.txt          # Python dependencies
-├── 🚀 run.sh                    # Startup script with virtual environment
-├── 📖 README.md                 # This documentation file
+📦 5G-Scanner/
+├── 🐍 app.py                        # Main Flask application & API routes
+├── ⚙️ config.py                     # Configuration management with JSON persistence  
+├── 📊 gscn_calculator.py            # 3GPP-compliant GSCN frequency calculations
+├── 📡 usrp_controller.py            # USRP device communication & process management
+├── 📋 config.json                   # User configuration file (auto-generated)
+├── 📄 requirements.txt              # Python dependencies (Flask, Flask-CORS, psutil)
+├── 🚀 run.sh                        # Startup script with virtual environment
+├── � ssb-scanner.service           # SystemD service configuration
+├── �📖 README.md                     # This documentation file
 ├── 📁 templates/
-│   └── 🌐 index.html           # Responsive web interface
-├── 📁 data/                     # Signal data storage directory
-│   ├── 📊 detected_frequencies.json  # Persistent scan results
-│   └── 📹 *.dat                 # Captured signal data files
-├── 📁 logs/                     # Application logs (future implementation)
-└── 📁 venv/                     # Python virtual environment (auto-created)
+│   └── 🌐 index.html               # Responsive web interface (1120+ lines)
+├── 📁 apps/
+│   └── 🔧 init_ssb_block           # Compiled USRP executable for signal detection
+├── 📁 fpga/
+│   ├── 💾 usrp_x310_fpga_HG.bin    # FPGA bitstream for X310 hardware
+│   └── 📊 usrp_x310_fpga_HG.rpt    # FPGA synthesis report
+├── 📁 data/                         # Signal data storage directory
+│   ├── 📊 detected_frequencies.json # Persistent scan results
+│   └── 📹 *.dat                     # Captured signal data files
+├── 📁 logs/                         # Application logs (future implementation)
+├── 📁 __pycache__/                  # Python bytecode cache
+└── 📁 venv/                         # Python virtual environment (auto-created)
 ```
 
 ### 🔧 Core Components
 
-| Component | Responsibility | Key Features |
-|-----------|---------------|--------------|
-| **`app.py`** | Main application & REST API | Flask routes, thread management, status handling |
-| **`config.py`** | Configuration management | JSON persistence, validation, default settings |
-| **`gscn_calculator.py`** | Frequency calculations | 3GPP compliance, band-specific logic |
-| **`usrp_controller.py`** | Hardware interface | Process control, error handling, cleanup |
-| **`templates/index.html`** | User interface | Real-time updates, responsive design |
+| Component | Responsibility | Key Features | Lines of Code |
+|-----------|---------------|--------------|---------------|
+| **`app.py`** | Main application & REST API | Flask routes, thread management, status handling | 605 lines |
+| **`config.py`** | Configuration management | JSON persistence, validation, default settings | 135 lines |
+| **`gscn_calculator.py`** | Frequency calculations | 3GPP compliance, band-specific logic | 176 lines |
+| **`usrp_controller.py`** | Hardware interface | Process control, error handling, cleanup | 301 lines |
+| **`templates/index.html`** | User interface | Real-time updates, responsive design | 1120 lines |
+
+### 🔧 Hardware Components
+
+| Component | Description | Purpose |
+|-----------|-------------|---------|
+| **`apps/init_ssb_block`** | Compiled RFNoC application | Direct USRP hardware control for SSB detection |
+| **`fpga/usrp_x310_fpga_HG.bin`** | FPGA bitstream | Custom signal processing logic for X310 |
+| **`fpga/usrp_x310_fpga_HG.rpt`** | Synthesis report | FPGA resource utilization and timing analysis |
+
+### 📊 Configuration Files
+
+| File | Purpose | Example Content |
+|------|---------|-----------------|
+| **`config.json`** | Runtime configuration | USRP paths, scanning parameters, timeouts |
+| **`requirements.txt`** | Python dependencies | Flask==2.3.3, Flask-CORS==4.0.0, psutil==5.9.5 |
+| **`ssb-scanner.service`** | SystemD service | Automatic startup, restart policies, user permissions |
+
+## �️ SystemD Service Installation
+
+For production deployment, install the scanner as a system service:
+
+```bash
+# Copy service file to systemd directory
+sudo cp ssb-scanner.service /etc/systemd/system/
+
+# Reload systemd and enable service
+sudo systemctl daemon-reload
+sudo systemctl enable ssb-scanner.service
+
+# Start the service
+sudo systemctl start ssb-scanner.service
+
+# Check service status
+sudo systemctl status ssb-scanner.service
+
+# View service logs
+sudo journalctl -u ssb-scanner.service -f
+```
+
+### Service Configuration
+
+The `ssb-scanner.service` file provides:
+- **Automatic startup** on system boot
+- **Restart policies** for high availability
+- **User isolation** for security
+- **Environment setup** with virtual environment
+- **Working directory** management
+
+```ini
+[Unit]
+Description=5G NR SSB Signal Scanner Service
+After=network.target
+
+[Service]
+Type=simple
+User=user
+WorkingDirectory=/home/user/Projects/5G-Scanner
+Environment="PATH=/home/user/Projects/5G-Scanner/venv/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/home/user/Projects/5G-Scanner/venv/bin/python /home/user/Projects/5G-Scanner/app.py
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
 
 ## 🔄 Migration from Previous Versions
 
@@ -294,25 +385,28 @@ curl -X POST http://localhost:5000/api/scan/single_freq \
 The application provides seamless migration from earlier versions:
 
 1. **🔄 Configuration Migration**: Automatic detection and conversion of old config formats
-2. **📊 Data Preservation**: Existing scan results are automatically imported
+2. **📊 Data Preservation**: Existing scan results are automatically imported from `data/detected_frequencies.json`
 3. **🔗 API Compatibility**: RESTful endpoints maintain backward compatibility
 4. **⚙️ Settings Transfer**: Previous USRP and scanning parameters are preserved
 
 ### 📋 Migration Checklist
 
-- [ ] **Update USRP executable path** in configuration
-- [ ] **Verify device IP address** in USRP arguments  
-- [ ] **Check data directory permissions** for write access
+- [ ] **Update USRP executable path** to `/home/user/Projects/5G-Scanner/apps/init_ssb_block`
+- [ ] **Verify FPGA bitstream** exists at `/home/user/Projects/5G-Scanner/fpga/usrp_x310_fpga_HG.bin`
+- [ ] **Check data directory permissions** for write access to `/home/user/Projects/5G-Scanner/data`
 - [ ] **Test configuration** using the validation button
 - [ ] **Run initial scan** to verify functionality
+- [ ] **Install SystemD service** for production deployment
 
 ### 🆕 New Features Available After Migration
 
+- **Enhanced Band Support**: Added n1 and n3 band support for broader coverage
 - **Real-time Live Logging**: Enhanced UI feedback during operations
 - **Overflow Detection**: Automatic handling of USRP overflow conditions  
 - **State Management**: Improved application state tracking and recovery
 - **Extended API**: Additional endpoints for advanced automation
 - **Performance Optimization**: Reduced scan times and improved reliability
+- **Production Service**: SystemD integration for enterprise deployment
 
 ## 🐛 Troubleshooting
 
@@ -321,37 +415,56 @@ The application provides seamless migration from earlier versions:
 #### 1. "USRP executable not found"
 ```bash
 # Solutions:
-✅ Check executable path in Configuration tab
-✅ Verify file exists: ls -la /path/to/init_ssb_block
-✅ Ensure executable permissions: chmod +x /path/to/init_ssb_block
+✅ Check executable path: /home/user/Projects/5G-Scanner/apps/init_ssb_block
+✅ Verify file exists: ls -la /home/user/Projects/5G-Scanner/apps/init_ssb_block
+✅ Ensure executable permissions: chmod +x /home/user/Projects/5G-Scanner/apps/init_ssb_block
 ✅ Use "Validate Config" button for real-time verification
 ```
 
 #### 2. "Cannot create data directory"  
 ```bash
 # Solutions:
-✅ Check directory permissions: ls -ld /path/to/data/directory
-✅ Create parent directories: mkdir -p /path/to/data/directory
-✅ Verify write access: touch /path/to/data/directory/test.txt
+✅ Check directory permissions: ls -ld /home/user/Projects/5G-Scanner/data
+✅ Create parent directories: mkdir -p /home/user/Projects/5G-Scanner/data
+✅ Verify write access: touch /home/user/Projects/5G-Scanner/data/test.txt
 ✅ Consider alternative path with proper permissions
 ```
 
-#### 3. "Connection timeouts"
+#### 3. "FPGA bitstream not found"
+```bash
+# Solutions:
+✅ Verify FPGA file: ls -la /home/user/Projects/5G-Scanner/fpga/usrp_x310_fpga_HG.bin
+✅ Check FPGA loading: uhd_image_loader --args="type=x300,addr=192.168.40.2"
+✅ Ensure correct bitstream version for your X310 hardware
+✅ Check UHD compatibility with custom RFNoC blocks
+```
+
+#### 4. "Connection timeouts"
 ```bash
 # Solutions:  
 ✅ Verify USRP IP: ping 192.168.40.2
 ✅ Check network connectivity and firewall settings
 ✅ Increase timeout in configuration (try 120 seconds)
-✅ Test with UHD utilities: uhd_find_devices
+✅ Test with UHD utilities: uhd_find_devices --args="type=x300"
 ```
 
-#### 4. "Frequent overflow errors"
+#### 5. "Frequent overflow errors"
 ```bash
 # Solutions:
 ✅ Reduce sample rate or gain settings
 ✅ Check system performance: top, iotop
 ✅ Ensure adequate disk I/O performance
 ✅ Consider USB3/Ethernet bandwidth limitations
+✅ Monitor data directory space: df -h /home/user/Projects/5G-Scanner/data
+```
+
+#### 6. "Service fails to start"
+```bash
+# Solutions:
+✅ Check service logs: sudo journalctl -u ssb-scanner.service
+✅ Verify virtual environment: /home/user/Projects/5G-Scanner/venv/bin/python --version
+✅ Test manual startup: cd /home/user/Projects/5G-Scanner && ./run.sh
+✅ Check file permissions: ls -la /home/user/Projects/5G-Scanner/
 ```
 
 ### 🔍 Debug Mode
@@ -428,20 +541,22 @@ We welcome contributions to improve the 5G NR SSB Signal Scanner! The modular ar
 
 | Component | Enhancement Opportunities |
 |-----------|---------------------------|
-| **`gscn_calculator.py`** | Add new 5G NR band definitions (n1, n3, n28, etc.) |
-| **`usrp_controller.py`** | Extend support for other USRP models (B200, N320) |
+| **`gscn_calculator.py`** | Add new 5G NR band definitions (n28, n40, n41, etc.) |
+| **`usrp_controller.py`** | Extend support for other USRP models (B200, N320, E320) |
 | **`config.py`** | Add new configuration options and validation |
 | **`templates/index.html`** | UI/UX improvements and new features |
+| **`fpga/`** | Enhanced RFNoC blocks for improved signal processing |
 | **Testing** | Automated testing framework and CI/CD pipeline |
 | **Documentation** | Tutorials, examples, and API documentation |
+| **Service Integration** | Docker containers, Kubernetes deployments |
 
 ### 🔧 Development Setup
 
 ```bash
 # 1. Fork the repository on GitHub
 # 2. Clone your fork
-git clone https://github.com/yourusername/NR5G.git
-cd NR5G/AppUI
+git clone https://github.com/yourusername/5G-Scanner.git
+cd 5G-Scanner
 
 # 3. Create development environment
 python -m venv venv_dev
@@ -454,7 +569,11 @@ git checkout -b feature/your-feature-name
 # 5. Make changes and test
 python app.py  # Test your changes
 
-# 6. Submit pull request
+# 6. Test with actual hardware
+./run.sh
+# Access http://localhost:5000 for testing
+
+# 7. Submit pull request
 git add .
 git commit -m "Add: your feature description"
 git push origin feature/your-feature-name
@@ -497,11 +616,53 @@ The GPL-3.0-or-later license is chosen to maintain compatibility with the underl
 
 ## 📞 Support & Contact
 
-- 🐛 **Issues**: [GitHub Issues](https://github.com/rockyco/NR5G/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/rockyco/NR5G/discussions)  
+- 🐛 **Issues**: [GitHub Issues](https://github.com/rockyco/5G-Scanner/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/rockyco/5G-Scanner/discussions)  
 - 📧 **Email**: For private inquiries and collaboration
-- 📖 **Documentation**: Comprehensive guides in the `/docs` directory
+- 📖 **Documentation**: Comprehensive guides in the project repository
+- 🔧 **Hardware Support**: USRP X310 configuration and RFNoC development
 
 ---
 
 ⭐ **If this project helps your research, please consider giving it a star!** ⭐
+
+## 📈 Real-World Performance Data
+
+Based on actual deployment results from the current implementation:
+
+### Detected Frequencies (Example from `data/detected_frequencies.json`)
+```json
+{
+  "n78": [
+    {
+      "gscn": 7846,
+      "frequency": 3499680000.0,
+      "ssb_count": 150,
+      "scs": 30
+    },
+    {
+      "gscn": 7905,
+      "frequency": 3584640000.0,
+      "ssb_count": 50,
+      "scs": 30
+    },
+    {
+      "gscn": 7951,
+      "frequency": 3650880000.0,
+      "ssb_count": 303,
+      "scs": 30
+    },
+    {
+      "gscn": 8048,
+      "frequency": 3790560000.0,
+      "ssb_count": 164,
+      "scs": 30
+    }
+  ]
+}
+```
+
+### Signal Data Files
+- `gscn_7846_3499.7MHz_20250816_235802_file1.dat` - 5G signal capture at 3.4997 GHz
+- `gscn_7846_3499.7MHz_20250817_034603_file1.dat` - Follow-up capture with temporal analysis
+- Multiple captures demonstrate consistent signal detection and long-term monitoring capabilities

@@ -1,0 +1,673 @@
+Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
+------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2019.1.1_AR73068 (lin64) Build 2580384 Sat Jun 29 08:04:45 MDT 2019
+| Date         : Tue Apr 22 04:39:43 2025
+| Host         : OAIBOX-MAX running 64-bit Ubuntu 22.04.5 LTS
+| Command      : report_utilization -omit_locs -file /home/user/Projects/USRP/uhd/fpga/usrp3/top/x300/build-X310_HG/build.rpt
+| Design       : x300
+| Device       : 7k410tffg900-2
+| Design State : Routed
+------------------------------------------------------------------------------------------------------------------------------
+
+Utilization Design Information
+
+Table of Contents
+-----------------
+1. Slice Logic
+1.1 Summary of Registers by Type
+2. Slice Logic Distribution
+3. Memory
+4. DSP
+5. IO and GT Specific
+6. Clocking
+7. Specific Feature
+8. Primitives
+9. Black Boxes
+10. Instantiated Netlists
+
+1. Slice Logic
+--------------
+
++----------------------------+--------+-----------+-------+
+|          Site Type         |  Used  | Available | Util% |
++----------------------------+--------+-----------+-------+
+| Slice LUTs                 | 152280 |    254200 | 59.91 |
+|   LUT as Logic             | 124819 |    254200 | 49.10 |
+|   LUT as Memory            |  27461 |     90600 | 30.31 |
+|     LUT as Distributed RAM |   7856 |           |       |
+|     LUT as Shift Register  |  19605 |           |       |
+| Slice Registers            | 245628 |    508400 | 48.31 |
+|   Register as Flip Flop    | 245614 |    508400 | 48.31 |
+|   Register as Latch        |      0 |    508400 |  0.00 |
+|   Register as AND/OR       |     14 |    508400 | <0.01 |
+| F7 Muxes                   |    423 |    127100 |  0.33 |
+| F8 Muxes                   |    105 |     63550 |  0.17 |
++----------------------------+--------+-----------+-------+
+
+
+1.1 Summary of Registers by Type
+--------------------------------
+
++--------+--------------+-------------+--------------+
+|  Total | Clock Enable | Synchronous | Asynchronous |
++--------+--------------+-------------+--------------+
+| 14     |            _ |           - |            - |
+| 0      |            _ |           - |          Set |
+| 0      |            _ |           - |        Reset |
+| 0      |            _ |         Set |            - |
+| 0      |            _ |       Reset |            - |
+| 0      |          Yes |           - |            - |
+| 3534   |          Yes |           - |          Set |
+| 24962  |          Yes |           - |        Reset |
+| 3839   |          Yes |         Set |            - |
+| 213431 |          Yes |       Reset |            - |
++--------+--------------+-------------+--------------+
+
+
+2. Slice Logic Distribution
+---------------------------
+
++--------------------------------------------+--------+-----------+-------+
+|                  Site Type                 |  Used  | Available | Util% |
++--------------------------------------------+--------+-----------+-------+
+| Slice                                      |  61287 |     63550 | 96.44 |
+|   SLICEL                                   |  39315 |           |       |
+|   SLICEM                                   |  21972 |           |       |
+| LUT as Logic                               | 124819 |    254200 | 49.10 |
+|   using O5 output only                     |     70 |           |       |
+|   using O6 output only                     |  89915 |           |       |
+|   using O5 and O6                          |  34834 |           |       |
+| LUT as Memory                              |  27461 |     90600 | 30.31 |
+|   LUT as Distributed RAM                   |   7856 |           |       |
+|     using O5 output only                   |      0 |           |       |
+|     using O6 output only                   |     76 |           |       |
+|     using O5 and O6                        |   7780 |           |       |
+|   LUT as Shift Register                    |  19605 |           |       |
+|     using O5 output only                   |   7431 |           |       |
+|     using O6 output only                   |   9100 |           |       |
+|     using O5 and O6                        |   3074 |           |       |
+| Slice Registers                            | 245628 |    508400 | 48.31 |
+|   Register driven from within the Slice    | 122734 |           |       |
+|   Register driven from outside the Slice   | 122894 |           |       |
+|     LUT in front of the register is unused |  87943 |           |       |
+|     LUT in front of the register is used   |  34951 |           |       |
+| Unique Control Sets                        |   8650 |     63550 | 13.61 |
++--------------------------------------------+--------+-----------+-------+
+* Note: Available Control Sets calculated as Slice Registers / 8, Review the Control Sets Report for more information regarding control sets.
+
+
+3. Memory
+---------
+
++-------------------+-------+-----------+-------+
+|     Site Type     |  Used | Available | Util% |
++-------------------+-------+-----------+-------+
+| Block RAM Tile    | 581.5 |       795 | 73.14 |
+|   RAMB36/FIFO*    |   552 |       795 | 69.43 |
+|     RAMB36E1 only |   552 |           |       |
+|   RAMB18          |    59 |      1590 |  3.71 |
+|     RAMB18E1 only |    59 |           |       |
++-------------------+-------+-----------+-------+
+* Note: Each Block RAM Tile only has one FIFO logic available and therefore can accommodate only one FIFO36E1 or one FIFO18E1. However, if a FIFO18E1 occupies a Block RAM Tile, that tile can still accommodate a RAMB18E1
+
+
+4. DSP
+------
+
++----------------+------+-----------+-------+
+|    Site Type   | Used | Available | Util% |
++----------------+------+-----------+-------+
+| DSPs           |  544 |      1540 | 35.32 |
+|   DSP48E1 only |  544 |           |       |
++----------------+------+-----------+-------+
+
+
+5. IO and GT Specific
+---------------------
+
++-----------------------------+------+-----------+-------+
+|          Site Type          | Used | Available | Util% |
++-----------------------------+------+-----------+-------+
+| Bonded IOB                  |  418 |       484 | 86.36 |
+|   IOB Master Pads           |  207 |           |       |
+|   IOB Slave Pads            |  204 |           |       |
+|   IOB Flip Flops            |  152 |           |       |
+| Bonded IPADs                |    8 |        50 | 16.00 |
+| Bonded OPADs                |    4 |        32 | 12.50 |
+| PHY_CONTROL                 |    2 |        10 | 20.00 |
+| PHASER_REF                  |    2 |        10 | 20.00 |
+| OUT_FIFO                    |    7 |        40 | 17.50 |
+| IN_FIFO                     |    4 |        40 | 10.00 |
+| IDELAYCTRL                  |    6 |        10 | 60.00 |
+| IBUFDS                      |   51 |       464 | 10.99 |
+| GTXE2_COMMON                |    2 |         4 | 50.00 |
+| GTXE2_CHANNEL               |    2 |        16 | 12.50 |
+| PHASER_OUT/PHASER_OUT_PHY   |    7 |        40 | 17.50 |
+|   PHASER_OUT_PHY only       |    7 |           |       |
+| PHASER_IN/PHASER_IN_PHY     |    4 |        40 | 10.00 |
+|   PHASER_IN_PHY only        |    4 |           |       |
+| IDELAYE2/IDELAYE2_FINEDELAY |   79 |       500 | 15.80 |
+|   IDELAYE2 only             |   79 |           |       |
+| ODELAYE2/ODELAYE2_FINEDELAY |    0 |       150 |  0.00 |
+| IBUFDS_GTE2                 |    2 |         8 | 25.00 |
+| ILOGIC                      |  158 |       500 | 31.60 |
+|   IFF_Register              |   76 |           |       |
+|   IFF_IDDR_Register         |   32 |           |       |
+|   ISERDES                   |   50 |       500 |       |
+| OLOGIC                      |  183 |       500 | 36.60 |
+|   OUTFF_Register            |   76 |           |       |
+|   OUTFF_ODDR_Register       |   25 |           |       |
+|   TFF_ODDR_Register         |    4 |           |       |
+|   OSERDES                   |   82 |       500 |       |
++-----------------------------+------+-----------+-------+
+
+
+6. Clocking
+-----------
+
++--------------+------+-----------+-------+
+|   Site Type  | Used | Available | Util% |
++--------------+------+-----------+-------+
+| BUFGCTRL     |   21 |        32 | 65.63 |
+| BUFIO        |    1 |        40 |  2.50 |
+|   BUFIO only |    1 |           |       |
+| MMCME2_ADV   |    4 |        10 | 40.00 |
+| PLLE2_ADV    |    3 |        10 | 30.00 |
+| BUFMRCE      |    0 |        20 |  0.00 |
+| BUFHCE       |    7 |       168 |  4.17 |
+| BUFR         |    2 |        40 |  5.00 |
++--------------+------+-----------+-------+
+
+
+7. Specific Feature
+-------------------
+
++-------------+------+-----------+--------+
+|  Site Type  | Used | Available |  Util% |
++-------------+------+-----------+--------+
+| BSCANE2     |    0 |         4 |   0.00 |
+| CAPTUREE2   |    0 |         1 |   0.00 |
+| DNA_PORT    |    0 |         1 |   0.00 |
+| EFUSE_USR   |    0 |         1 |   0.00 |
+| FRAME_ECCE2 |    0 |         1 |   0.00 |
+| ICAPE2      |    0 |         2 |   0.00 |
+| PCIE_2_1    |    0 |         1 |   0.00 |
+| STARTUPE2   |    1 |         1 | 100.00 |
+| XADC        |    1 |         1 | 100.00 |
++-------------+------+-----------+--------+
+
+
+8. Primitives
+-------------
+
++------------------------+--------+---------------------+
+|        Ref Name        |  Used  | Functional Category |
++------------------------+--------+---------------------+
+| FDRE                   | 213431 |        Flop & Latch |
+| LUT3                   |  50322 |                 LUT |
+| LUT6                   |  32800 |                 LUT |
+| LUT4                   |  26165 |                 LUT |
+| FDCE                   |  24962 |        Flop & Latch |
+| LUT2                   |  23033 |                 LUT |
+| LUT5                   |  21588 |                 LUT |
+| SRL16E                 |  14002 |  Distributed Memory |
+| RAMD32                 |  12464 |  Distributed Memory |
+| SRLC32E                |   8677 |  Distributed Memory |
+| CARRY4                 |   8673 |          CarryLogic |
+| LUT1                   |   5745 |                 LUT |
+| FDSE                   |   3839 |        Flop & Latch |
+| FDPE                   |   3534 |        Flop & Latch |
+| RAMS32                 |   3096 |  Distributed Memory |
+| RAMB36E1               |    552 |        Block Memory |
+| DSP48E1                |    544 |    Block Arithmetic |
+| MUXF7                  |    423 |               MuxFx |
+| IBUF                   |    119 |                  IO |
+| MUXF8                  |    105 |               MuxFx |
+| OBUFT                  |     93 |                  IO |
+| OSERDESE2              |     82 |                  IO |
+| OBUF                   |     81 |                  IO |
+| IDELAYE2               |     79 |                  IO |
+| RAMD64E                |     76 |  Distributed Memory |
+| RAMB18E1               |     59 |        Block Memory |
+| IBUFDS                 |     51 |                  IO |
+| ISERDESE2              |     50 |                  IO |
+| OBUFDS                 |     41 |                  IO |
+| OBUFT_DCIEN            |     32 |                  IO |
+| IDDR                   |     32 |                  IO |
+| IBUF_IBUFDISABLE       |     32 |                  IO |
+| ODDR                   |     29 |                  IO |
+| BUFG                   |     21 |               Clock |
+| AND2B1L                |     12 |              Others |
+| OBUFTDS_DCIEN          |      8 |                  IO |
+| IBUFDS_IBUFDISABLE_INT |      8 |                  IO |
+| PHASER_OUT_PHY         |      7 |                  IO |
+| OUT_FIFO               |      7 |                  IO |
+| IDELAYCTRL             |      6 |                  IO |
+| INV                    |      5 |                 LUT |
+| BUFH                   |      5 |               Clock |
+| PHASER_IN_PHY          |      4 |                  IO |
+| MMCME2_ADV             |      4 |               Clock |
+| IN_FIFO                |      4 |                  IO |
+| PLLE2_ADV              |      3 |               Clock |
+| PHY_CONTROL            |      2 |                  IO |
+| PHASER_REF             |      2 |                  IO |
+| OR2L                   |      2 |              Others |
+| IBUFDS_GTE2            |      2 |                  IO |
+| GTXE2_COMMON           |      2 |                  IO |
+| GTXE2_CHANNEL          |      2 |                  IO |
+| BUFR                   |      2 |               Clock |
+| BUFHCE                 |      2 |               Clock |
+| XADC                   |      1 |              Others |
+| STARTUPE2              |      1 |              Others |
+| BUFIO                  |      1 |               Clock |
++------------------------+--------+---------------------+
+
+
+9. Black Boxes
+--------------
+
++----------+------+
+| Ref Name | Used |
++----------+------+
+
+
+10. Instantiated Netlists
+-------------------------
+
++-------------------------+------+
+|         Ref Name        | Used |
++-------------------------+------+
+| fifo_short_2clk         |  129 |
+| dds_sin_cos_lut_only    |    6 |
+| complex_multiplier_dds  |    6 |
+| axi_hb47                |    6 |
+| hbdec3                  |    4 |
+| hbdec2                  |    4 |
+| hbdec1                  |    4 |
+| fifo_4k_2clk            |    2 |
+| bootram                 |    2 |
+| axi64_8k_2clk_fifo      |    2 |
+| axi64_4k_2clk_fifo      |    2 |
+| ten_gig_eth_pcs_pma     |    1 |
+| radio_clk_gen           |    1 |
+| pcie_clk_gen            |    1 |
+| one_gig_eth_pcs_pma     |    1 |
+| detectSSB_run_core_ip   |    1 |
+| detectSSB_run_8_core_ip |    1 |
+| detectSSB_run_7_core_ip |    1 |
+| detectSSB_run_6_core_ip |    1 |
+| detectSSB_run_5_core_ip |    1 |
+| detectSSB_run_4_core_ip |    1 |
+| detectSSB_run_3_core_ip |    1 |
+| detectSSB_run_2_core_ip |    1 |
+| detectSSB_run_1_core_ip |    1 |
+| ddr3_32bit              |    1 |
+| bus_clk_gen             |    1 |
+| LvFpga_Chinch_Interface |    1 |
++-------------------------+------+
+
+
+Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
+-------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2019.1.1_AR73068 (lin64) Build 2580384 Sat Jun 29 08:04:45 MDT 2019
+| Date         : Tue Apr 22 04:39:52 2025
+| Host         : OAIBOX-MAX running 64-bit Ubuntu 22.04.5 LTS
+| Command      : report_timing_summary -no_detailed_paths -file /home/user/Projects/USRP/uhd/fpga/usrp3/top/x300/build-X310_HG/build.rpt -append
+| Design       : x300
+| Device       : 7k410t-ffg900
+| Speed File   : -2  PRODUCTION 1.12 2017-02-17
+-------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Summary Report
+
+------------------------------------------------------------------------------------------------
+| Timer Settings
+| --------------
+------------------------------------------------------------------------------------------------
+
+  Enable Multi Corner Analysis               :  Yes
+  Enable Pessimism Removal                   :  Yes
+  Pessimism Removal Resolution               :  Nearest Common Node
+  Enable Input Delay Default Clock           :  No
+  Enable Preset / Clear Arcs                 :  No
+  Disable Flight Delays                      :  No
+  Ignore I/O Paths                           :  No
+  Timing Early Launch at Borrowing Latches   :  No
+  Borrow Time for Max Delay Exceptions       :  Yes
+
+  Corner  Analyze    Analyze    
+  Name    Max Paths  Min Paths  
+  ------  ---------  ---------  
+  Slow    Yes        Yes        
+  Fast    Yes        Yes        
+
+
+
+check_timing report
+
+Table of Contents
+-----------------
+1. checking no_clock
+2. checking constant_clock
+3. checking pulse_width_clock
+4. checking unconstrained_internal_endpoints
+5. checking no_input_delay
+6. checking no_output_delay
+7. checking multiple_clock
+8. checking generated_clocks
+9. checking loops
+10. checking partial_input_delay
+11. checking partial_output_delay
+12. checking latch_loops
+
+1. checking no_clock
+--------------------
+ There are 0 register/latch pins with no clock.
+
+
+2. checking constant_clock
+--------------------------
+ There are 0 register/latch pins with constant_clock.
+
+
+3. checking pulse_width_clock
+-----------------------------
+ There are 0 register/latch pins which need pulse_width check
+
+
+4. checking unconstrained_internal_endpoints
+--------------------------------------------
+ There are 0 pins that are not constrained for maximum delay.
+
+ There are 0 pins that are not constrained for maximum delay due to constant clock.
+
+
+5. checking no_input_delay
+--------------------------
+ There are 4 input ports with no input delay specified. (HIGH)
+
+ There are 11 input ports with no input delay but user has a false path constraint. (MEDIUM)
+
+
+6. checking no_output_delay
+---------------------------
+ There is 1 port with no output delay specified. (HIGH)
+
+ There are 23 ports with no output delay but user has a false path constraint (MEDIUM)
+
+ There is 1 port with no output delay but with a timing clock defined on it or propagating through it (LOW)
+
+
+7. checking multiple_clock
+--------------------------
+ There are 0 register/latch pins with multiple clocks.
+
+
+8. checking generated_clocks
+----------------------------
+ There are 0 generated clocks that are not connected to a clock source.
+
+
+9. checking loops
+-----------------
+ There are 0 combinational loops in the design.
+
+
+10. checking partial_input_delay
+--------------------------------
+ There are 97 input ports with partial input delay specified. (HIGH)
+
+
+11. checking partial_output_delay
+---------------------------------
+ There are 0 ports with partial output delay specified.
+
+
+12. checking latch_loops
+------------------------
+ There are 0 combinational latch loops in the design through latch input
+
+
+
+------------------------------------------------------------------------------------------------
+| Design Timing Summary
+| ---------------------
+------------------------------------------------------------------------------------------------
+
+    WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints  
+    -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------  
+      0.016        0.000                      0               738820        0.003        0.000                      0               738193        0.001        0.000                       0                286472  
+
+
+All user specified timing constraints are met.
+
+
+------------------------------------------------------------------------------------------------
+| Clock Summary
+| -------------
+------------------------------------------------------------------------------------------------
+
+Clock                                                                                                                                                          Waveform(ns)         Period(ns)      Frequency(MHz)
+-----                                                                                                                                                          ------------         ----------      --------------
+DB0_ADC_DCLK                                                                                                                                                   {0.000 2.500}        5.000           200.000         
+DB1_ADC_DCLK                                                                                                                                                   {0.000 2.500}        5.000           200.000         
+ETH_CLK                                                                                                                                                        {0.000 4.000}        8.000           125.000         
+FPGA_125MHz_CLK                                                                                                                                                {0.000 4.000}        8.000           125.000         
+  bus_clk                                                                                                                                                      {0.000 2.667}        5.333           187.500         
+  bus_clk_div2                                                                                                                                                 {0.000 5.333}        10.667          93.750          
+  ce_clk                                                                                                                                                       {0.000 2.333}        4.667           214.286         
+  clkfbout_pcie_clk_gen                                                                                                                                        {0.000 4.000}        8.000           125.000         
+  ioport2_clk                                                                                                                                                  {0.000 4.000}        8.000           125.000         
+    IoPort2Wrapperx/TxClockGenx/TxUseMmcm.ClkFbOutMmcm                                                                                                         {0.000 4.000}        8.000           125.000         
+    IoPort2Wrapperx/TxClockGenx/TxUseMmcm.ClkOut0Mmcm                                                                                                          {0.000 2.000}        4.000           250.000         
+      IoTxClock                                                                                                                                                {0.000 2.000}        4.000           250.000         
+    IoPort2Wrapperx/TxClockGenx/TxUseMmcm.ClkOut1Mmcm                                                                                                          {0.000 4.000}        8.000           125.000         
+  ioport2_idelay_ref_clk                                                                                                                                       {0.000 2.500}        5.000           200.000         
+  rio40_clk                                                                                                                                                    {0.000 12.500}       25.000          40.000          
+FPGA_CLK                                                                                                                                                       {0.000 2.500}        5.000           200.000         
+  CLK_OUT3_radio_clk_gen                                                                                                                                       {0.417 1.667}        2.500           400.000         
+    DB0_DAC_DCI                                                                                                                                                {0.417 1.667}        2.500           400.000         
+    DB1_DAC_DCI                                                                                                                                                {0.417 1.667}        2.500           400.000         
+  clkfbout_radio_clk_gen                                                                                                                                       {0.000 2.500}        5.000           200.000         
+  radio_clk                                                                                                                                                    {0.000 2.500}        5.000           200.000         
+  radio_clk_2x                                                                                                                                                 {-0.312 0.937}       2.500           400.000         
+FPGA_REFCLK                                                                                                                                                    {0.000 16.281}       32.563          30.710          
+IoRxClock                                                                                                                                                      {0.000 2.000}        4.000           250.000         
+  IoPort2Wrapperx/RxLowSpeedClk                                                                                                                                {0.000 4.000}        8.000           125.000         
+VIRT_DAC_CLK                                                                                                                                                   {0.000 1.250}        2.500           400.000         
+XG_CLK                                                                                                                                                         {0.000 3.200}        6.400           156.250         
+  dclk_buf                                                                                                                                                     {0.000 6.400}        12.800          78.125          
+sfpp_io_i0/one_gige_phy_i/core_support_i/pcs_pma_i/inst/transceiver_inst/gtwizard_inst/inst/gtwizard_i/gt0_GTWIZARD_i/gtxe2_i/RXOUTCLK                         {0.000 8.000}        16.000          62.500          
+sfpp_io_i0/one_gige_phy_i/core_support_i/pcs_pma_i/inst/transceiver_inst/gtwizard_inst/inst/gtwizard_i/gt0_GTWIZARD_i/gtxe2_i/TXOUTCLK                         {0.000 8.000}        16.000          62.500          
+  clkfbout                                                                                                                                                     {0.000 8.000}        16.000          62.500          
+  clkout0                                                                                                                                                      {0.000 4.000}        8.000           125.000         
+  clkout1                                                                                                                                                      {0.000 8.000}        16.000          62.500          
+sfpp_io_i1/ten_gige_phy_i/ten_gig_eth_pcs_pma_i/inst/gt0_gtwizard_10gbaser_multi_gt_i/gt0_gtwizard_10gbaser_i/gtxe2_i/RXOUTCLK                                 {0.000 1.551}        3.103           322.269         
+sfpp_io_i1/ten_gige_phy_i/ten_gig_eth_pcs_pma_i/inst/gt0_gtwizard_10gbaser_multi_gt_i/gt0_gtwizard_10gbaser_i/gtxe2_i/TXOUTCLK                                 {0.000 1.551}        3.103           322.269         
+sys_clk_i                                                                                                                                                      {0.000 4.998}        9.996           100.040         
+  freq_refclk                                                                                                                                                  {1.562 2.395}        1.666           600.240         
+    u_memc_ui_top_axi/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/iserdes_clk  {1.562 2.395}        1.666           600.240         
+      iserdes_clkdiv                                                                                                                                           {1.562 3.228}        3.332           300.120         
+    u_memc_ui_top_axi/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/iserdes_clk  {1.562 2.395}        1.666           600.240         
+      iserdes_clkdiv_1                                                                                                                                         {1.562 3.228}        3.332           300.120         
+    u_memc_ui_top_axi/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_C.ddr_byte_lane_C/iserdes_clk  {1.562 2.395}        1.666           600.240         
+      iserdes_clkdiv_2                                                                                                                                         {1.562 3.228}        3.332           300.120         
+    u_memc_ui_top_axi/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_D.ddr_byte_lane_D/iserdes_clk  {1.562 2.395}        1.666           600.240         
+      iserdes_clkdiv_3                                                                                                                                         {1.562 3.228}        3.332           300.120         
+  mem_refclk                                                                                                                                                   {0.000 0.833}        1.666           600.240         
+    oserdes_clk                                                                                                                                                {0.000 0.833}        1.666           600.240         
+      oserdes_clkdiv                                                                                                                                           {0.000 1.666}        3.332           300.120         
+    oserdes_clk_1                                                                                                                                              {0.000 0.833}        1.666           600.240         
+      oserdes_clkdiv_1                                                                                                                                         {0.000 1.666}        3.332           300.120         
+    oserdes_clk_2                                                                                                                                              {0.000 0.833}        1.666           600.240         
+      oserdes_clkdiv_2                                                                                                                                         {0.000 1.666}        3.332           300.120         
+    oserdes_clk_3                                                                                                                                              {0.000 0.833}        1.666           600.240         
+      oserdes_clkdiv_3                                                                                                                                         {0.000 1.666}        3.332           300.120         
+    oserdes_clk_4                                                                                                                                              {0.000 0.833}        1.666           600.240         
+      oserdes_clkdiv_4                                                                                                                                         {0.000 3.332}        6.664           150.060         
+    oserdes_clk_5                                                                                                                                              {0.000 0.833}        1.666           600.240         
+      oserdes_clkdiv_5                                                                                                                                         {0.000 3.332}        6.664           150.060         
+    oserdes_clk_6                                                                                                                                              {0.000 0.833}        1.666           600.240         
+      oserdes_clkdiv_6                                                                                                                                         {0.000 3.332}        6.664           150.060         
+  pll_clk3_out                                                                                                                                                 {0.000 3.332}        6.664           150.060         
+    ddr3_axi_clk                                                                                                                                               {0.000 3.332}        6.664           150.060         
+    ddr3_axi_clk_x2                                                                                                                                            {0.000 1.666}        3.332           300.120         
+    mmcm_clkout1                                                                                                                                               {0.000 2.499}        4.998           200.080         
+    mmcm_ps_clk_bufg_in                                                                                                                                        {0.000 6.664}        13.328          75.030          
+  pll_clkfbout                                                                                                                                                 {0.000 4.998}        9.996           100.040         
+  sync_pulse                                                                                                                                                   {0.729 2.395}        26.656          37.515          
+
+
+------------------------------------------------------------------------------------------------
+| Intra Clock Table
+| -----------------
+------------------------------------------------------------------------------------------------
+
+Clock                                                                                                                                                              WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints  
+-----                                                                                                                                                              -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------  
+DB0_ADC_DCLK                                                                                                                                                         1.762        0.000                      0                  249        0.086        0.000                      0                  249        2.100        0.000                       0                   161  
+DB1_ADC_DCLK                                                                                                                                                         1.248        0.000                      0                  249        0.068        0.000                      0                  249        2.100        0.000                       0                   161  
+ETH_CLK                                                                                                                                                              7.029        0.000                      0                    7        0.172        0.000                      0                    7        2.286        0.000                       0                    14  
+FPGA_125MHz_CLK                                                                                                                                                                                                                                                                                                  2.000        0.000                       0                     2  
+  bus_clk                                                                                                                                                            0.151        0.000                      0               204665        0.010        0.000                      0               204665        1.899        0.000                       0                 85260  
+  bus_clk_div2                                                                                                                                                       1.966        0.000                      0                40732        0.054        0.000                      0                40732        4.565        0.000                       0                 17965  
+  ce_clk                                                                                                                                                             0.271        0.000                      0               202834        0.035        0.000                      0               202834        1.565        0.000                       0                 79290  
+  clkfbout_pcie_clk_gen                                                                                                                                                                                                                                                                                          6.591        0.000                       0                     3  
+  ioport2_clk                                                                                                                                                        0.256        0.000                      0                32988        0.011        0.000                      0                32988        2.000        0.000                       0                 15495  
+    IoPort2Wrapperx/TxClockGenx/TxUseMmcm.ClkFbOutMmcm                                                                                                                                                                                                                                                           6.929        0.000                       0                     2  
+    IoPort2Wrapperx/TxClockGenx/TxUseMmcm.ClkOut0Mmcm                                                                                                                                                                                                                                                            2.592        0.000                       0                    20  
+    IoPort2Wrapperx/TxClockGenx/TxUseMmcm.ClkOut1Mmcm                                                                                                                3.078        0.000                      0                  855        0.054        0.000                      0                  855        3.232        0.000                       0                   379  
+  ioport2_idelay_ref_clk                                                                                                                                                                                                                                                                                         0.264        0.000                       0                     3  
+  rio40_clk                                                                                                                                                         23.071        0.000                      0                  400        0.103        0.000                      0                  400       12.100        0.000                       0                   458  
+FPGA_CLK                                                                                                                                                                                                                                                                                                         1.100        0.000                       0                     1  
+  CLK_OUT3_radio_clk_gen                                                                                                                                                                                                                                                                                         1.092        0.000                       0                     4  
+  clkfbout_radio_clk_gen                                                                                                                                                                                                                                                                                         3.592        0.000                       0                     3  
+  radio_clk                                                                                                                                                          0.044        0.000                      0               151094        0.048        0.000                      0               151094        0.264        0.000                       0                 54529  
+  radio_clk_2x                                                                                                                                                       0.150        0.000                      0                   40        0.143        0.000                      0                   40        0.850        0.000                       0                    90  
+FPGA_REFCLK                                                                                                                                                         25.253        0.000                      0                  286        0.730        0.000                      0                  286       15.882        0.000                       0                   187  
+IoRxClock                                                                                                                                                            0.031        0.000                      0                   18        0.066        0.000                      0                   17        2.751        0.000                       0                    38  
+  IoPort2Wrapperx/RxLowSpeedClk                                                                                                                                      3.060        0.000                      0                  696        0.077        0.000                      0                  696        3.600        0.000                       0                   400  
+XG_CLK                                                                                                                                                               1.981        0.000                      0                 6498        0.010        0.000                      0                 6497        2.432        0.000                       0                  3387  
+  dclk_buf                                                                                                                                                           9.922        0.000                      0                  185        0.108        0.000                      0                  185        6.000        0.000                       0                   123  
+sfpp_io_i0/one_gige_phy_i/core_support_i/pcs_pma_i/inst/transceiver_inst/gtwizard_inst/inst/gtwizard_i/gt0_GTWIZARD_i/gtxe2_i/TXOUTCLK                                                                                                                                                                           5.000        0.000                       0                     3  
+  clkfbout                                                                                                                                                                                                                                                                                                      14.929        0.000                       0                     2  
+  clkout0                                                                                                                                                            3.458        0.000                      0                 2232        0.041        0.000                      0                 2232        3.358        0.000                       0                  1066  
+  clkout1                                                                                                                                                           13.306        0.000                      0                  156        0.143        0.000                      0                  156        7.600        0.000                       0                   124  
+sfpp_io_i1/ten_gige_phy_i/ten_gig_eth_pcs_pma_i/inst/gt0_gtwizard_10gbaser_multi_gt_i/gt0_gtwizard_10gbaser_i/gtxe2_i/RXOUTCLK                                       0.086        0.000                      0                 3774        0.053        0.000                      0                 3774        0.001        0.000                       0                  1464  
+sfpp_io_i1/ten_gige_phy_i/ten_gig_eth_pcs_pma_i/inst/gt0_gtwizard_10gbaser_multi_gt_i/gt0_gtwizard_10gbaser_i/gtxe2_i/TXOUTCLK                                       1.018        0.000                      0                  339        0.054        0.000                      0                  339        0.001        0.000                       0                   203  
+sys_clk_i                                                                                                                                                                                                                                                                                                        2.998        0.000                       0                     1  
+  freq_refclk                                                                                                                                                                                                                                                                                                    0.351        0.000                       0                    14  
+    u_memc_ui_top_axi/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/iserdes_clk                                                                                                                                                    0.596        0.000                       0                    16  
+      iserdes_clkdiv                                                                                                                                                 1.808        0.000                      0                   33        0.070        0.000                      0                   33        0.752        0.000                       0                     9  
+    u_memc_ui_top_axi/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/iserdes_clk                                                                                                                                                    0.596        0.000                       0                    16  
+      iserdes_clkdiv_1                                                                                                                                               1.688        0.000                      0                   33        0.070        0.000                      0                   33        0.752        0.000                       0                     9  
+    u_memc_ui_top_axi/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_C.ddr_byte_lane_C/iserdes_clk                                                                                                                                                    0.596        0.000                       0                    16  
+      iserdes_clkdiv_2                                                                                                                                               1.703        0.000                      0                   33        0.070        0.000                      0                   33        0.752        0.000                       0                     9  
+    u_memc_ui_top_axi/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_D.ddr_byte_lane_D/iserdes_clk                                                                                                                                                    0.596        0.000                       0                    16  
+      iserdes_clkdiv_3                                                                                                                                               1.814        0.000                      0                   33        0.070        0.000                      0                   33        0.752        0.000                       0                     9  
+  mem_refclk                                                                                                                                                         0.586        0.000                      0                    2        0.324        0.000                      0                    2        0.298        0.000                       0                    14  
+    oserdes_clk                                                                                                                                                      0.605        0.000                      0                    4        0.369        0.000                      0                    4        0.596        0.000                       0                    12  
+      oserdes_clkdiv                                                                                                                                                 2.345        0.000                      0                   36        0.064        0.000                      0                   36        0.752        0.000                       0                    11  
+    oserdes_clk_1                                                                                                                                                    0.592        0.000                      0                    4        0.375        0.000                      0                    4        0.596        0.000                       0                    12  
+      oserdes_clkdiv_1                                                                                                                                               2.335        0.000                      0                   36        0.068        0.000                      0                   36        0.752        0.000                       0                    11  
+    oserdes_clk_2                                                                                                                                                    0.600        0.000                      0                    4        0.371        0.000                      0                    4        0.596        0.000                       0                    12  
+      oserdes_clkdiv_2                                                                                                                                               2.221        0.000                      0                   36        0.066        0.000                      0                   36        0.752        0.000                       0                    11  
+    oserdes_clk_3                                                                                                                                                    0.612        0.000                      0                    4        0.364        0.000                      0                    4        0.596        0.000                       0                    12  
+      oserdes_clkdiv_3                                                                                                                                               2.148        0.000                      0                   36        0.062        0.000                      0                   36        0.752        0.000                       0                    11  
+    oserdes_clk_4                                                                                                                                                                                                                                                                                                0.596        0.000                       0                     2  
+      oserdes_clkdiv_4                                                                                                                                               5.667        0.000                      0                    8        0.075        0.000                      0                    8        2.418        0.000                       0                     3  
+    oserdes_clk_5                                                                                                                                                                                                                                                                                                0.596        0.000                       0                    12  
+      oserdes_clkdiv_5                                                                                                                                               5.668        0.000                      0                   48        0.066        0.000                      0                   48        2.418        0.000                       0                    13  
+    oserdes_clk_6                                                                                                                                                                                                                                                                                                0.596        0.000                       0                    11  
+      oserdes_clkdiv_6                                                                                                                                               5.480        0.000                      0                   40        0.062        0.000                      0                   40        2.418        0.000                       0                    11  
+  pll_clk3_out                                                                                                                                                                                                                                                                                                   1.832        0.000                       0                     3  
+    ddr3_axi_clk                                                                                                                                                     0.431        0.000                      0                40544        0.009        0.000                      0                40544        2.082        0.000                       0                 16622  
+    ddr3_axi_clk_x2                                                                                                                                                  0.221        0.000                      0                21983        0.015        0.000                      0                21983        0.898        0.000                       0                  8683  
+    mmcm_clkout1                                                                                                                                                     4.239        0.000                      0                   14        0.154        0.000                      0                   14        0.266        0.000                       0                    18  
+    mmcm_ps_clk_bufg_in                                                                                                                                              4.435        0.000                      0                   16        0.114        0.000                      0                   16        6.314        0.000                       0                    20  
+  pll_clkfbout                                                                                                                                                                                                                                                                                                   8.925        0.000                       0                     2  
+  sync_pulse                                                                                                                                                                                                                                                                                                     0.594        0.000                       0                    14  
+
+
+------------------------------------------------------------------------------------------------
+| Inter Clock Table
+| -----------------
+------------------------------------------------------------------------------------------------
+
+From Clock                                                                                                                                                 To Clock                                                                                                                                                       WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints  
+----------                                                                                                                                                 --------                                                                                                                                                       -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------  
+bus_clk_div2                                                                                                                                               bus_clk                                                                                                                                                          0.297        0.000                      0                  709        0.066        0.000                      0                  674  
+input port clock                                                                                                                                           bus_clk_div2                                                                                                                                                     2.234        0.000                      0                    3                                                                        
+bus_clk                                                                                                                                                    bus_clk_div2                                                                                                                                                     0.201        0.000                      0                  350        0.400        0.000                      0                  315  
+ce_clk                                                                                                                                                     bus_clk_div2                                                                                                                                                     3.883        0.000                      0                   40                                                                        
+ddr3_axi_clk_x2                                                                                                                                            bus_clk_div2                                                                                                                                                     2.355        0.000                      0                   10                                                                        
+bus_clk_div2                                                                                                                                               ce_clk                                                                                                                                                           9.902        0.000                      0                   40                                                                        
+input port clock                                                                                                                                           ioport2_clk                                                                                                                                                      5.948        0.000                      0                    3                                                                        
+IoPort2Wrapperx/TxClockGenx/TxUseMmcm.ClkOut1Mmcm                                                                                                          ioport2_clk                                                                                                                                                      4.235        0.000                      0                    9                                                                        
+IoPort2Wrapperx/TxClockGenx/TxUseMmcm.ClkOut0Mmcm                                                                                                          IoTxClock                                                                                                                                                        0.032        0.000                      0                   34        0.124        0.000                      0                   34  
+ioport2_clk                                                                                                                                                IoPort2Wrapperx/TxClockGenx/TxUseMmcm.ClkOut1Mmcm                                                                                                                4.096        0.000                      0                   33                                                                        
+radio_clk_2x                                                                                                                                               DB0_DAC_DCI                                                                                                                                                      0.066        0.000                      0                   18        0.003        0.000                      0                   18  
+radio_clk_2x                                                                                                                                               DB1_DAC_DCI                                                                                                                                                      0.016        0.000                      0                   18        0.009        0.000                      0                   18  
+input port clock                                                                                                                                           radio_clk                                                                                                                                                        0.551        0.000                      0                   78                                                                        
+DB0_ADC_DCLK                                                                                                                                               radio_clk                                                                                                                                                        0.116        0.000                      0                   28                                                                        
+DB1_ADC_DCLK                                                                                                                                               radio_clk                                                                                                                                                        0.059        0.000                      0                   28                                                                        
+FPGA_REFCLK                                                                                                                                                radio_clk                                                                                                                                                        2.058        0.000                      0                    1        0.594        0.000                      0                    1  
+radio_clk                                                                                                                                                  radio_clk_2x                                                                                                                                                     0.405        0.000                      0                   70        0.099        0.000                      0                   70  
+input port clock                                                                                                                                           FPGA_REFCLK                                                                                                                                                      1.594        0.000                      0                    1                                                                        
+input port clock                                                                                                                                           IoRxClock                                                                                                                                                        0.423        0.000                      0                    1                                                                        
+CLK_OUT3_radio_clk_gen                                                                                                                                     VIRT_DAC_CLK                                                                                                                                                     0.043        0.000                      0                    4        0.028        0.000                      0                    4  
+DB0_DAC_DCI                                                                                                                                                VIRT_DAC_CLK                                                                                                                                                     0.139        0.000                      0                    1        0.028        0.000                      0                    1  
+DB1_DAC_DCI                                                                                                                                                VIRT_DAC_CLK                                                                                                                                                     0.043        0.000                      0                    1        0.148        0.000                      0                    1  
+dclk_buf                                                                                                                                                   XG_CLK                                                                                                                                                           2.194        0.000                      0                   16                                                                        
+XG_CLK                                                                                                                                                     dclk_buf                                                                                                                                                         2.208        0.000                      0                   26                                                                        
+clkout1                                                                                                                                                    clkout0                                                                                                                                                          5.601        0.000                      0                   28        0.110        0.000                      0                   28  
+clkout0                                                                                                                                                    clkout1                                                                                                                                                          5.677        0.000                      0                   24        0.111        0.000                      0                   24  
+ddr3_axi_clk                                                                                                                                               u_memc_ui_top_axi/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/iserdes_clk        4.249        0.000                      0                    8       25.807        0.000                      0                    8  
+ddr3_axi_clk                                                                                                                                               u_memc_ui_top_axi/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/iserdes_clk        3.228        0.000                      0                    8       26.396        0.000                      0                    8  
+ddr3_axi_clk                                                                                                                                               u_memc_ui_top_axi/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_C.ddr_byte_lane_C/iserdes_clk        2.278        0.000                      0                    8       26.938        0.000                      0                    8  
+ddr3_axi_clk                                                                                                                                               u_memc_ui_top_axi/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_D.ddr_byte_lane_D/iserdes_clk        1.415        0.000                      0                    8       27.436        0.000                      0                    8  
+sync_pulse                                                                                                                                                 mem_refclk                                                                                                                                                       0.443        0.000                      0                    2        0.252        0.000                      0                    2  
+oserdes_clk                                                                                                                                                oserdes_clkdiv                                                                                                                                                   0.914        0.000                      0                   15        0.045        0.000                      0                   15  
+oserdes_clk_1                                                                                                                                              oserdes_clkdiv_1                                                                                                                                                 0.914        0.000                      0                   15        0.077        0.000                      0                   15  
+oserdes_clk_2                                                                                                                                              oserdes_clkdiv_2                                                                                                                                                 0.914        0.000                      0                   15        0.075        0.000                      0                   15  
+oserdes_clk_3                                                                                                                                              oserdes_clkdiv_3                                                                                                                                                 0.914        0.000                      0                   15        0.020        0.000                      0                   15  
+oserdes_clk_4                                                                                                                                              oserdes_clkdiv_4                                                                                                                                                 0.914        0.000                      0                    3        0.065        0.000                      0                    3  
+oserdes_clk_5                                                                                                                                              oserdes_clkdiv_5                                                                                                                                                 0.914        0.000                      0                   13        0.094        0.000                      0                   13  
+oserdes_clk_6                                                                                                                                              oserdes_clkdiv_6                                                                                                                                                 0.901        0.000                      0                   11        0.025        0.000                      0                   11  
+ddr3_axi_clk_x2                                                                                                                                            ddr3_axi_clk                                                                                                                                                     2.457        0.000                      0                   58                                                                        
+mmcm_ps_clk_bufg_in                                                                                                                                        ddr3_axi_clk                                                                                                                                                     4.493        0.000                      0                    5        0.103        0.000                      0                    5  
+bus_clk_div2                                                                                                                                               ddr3_axi_clk_x2                                                                                                                                                  9.979        0.000                      0                   10                                                                        
+ddr3_axi_clk                                                                                                                                               ddr3_axi_clk_x2                                                                                                                                                  0.456        0.000                      0                  369        0.100        0.000                      0                  311  
+ddr3_axi_clk                                                                                                                                               mmcm_ps_clk_bufg_in                                                                                                                                              4.937        0.000                      0                    1        0.123        0.000                      0                    1  
+
+
+------------------------------------------------------------------------------------------------
+| Other Path Groups Table
+| -----------------------
+------------------------------------------------------------------------------------------------
+
+Path Group                                                                                                                      From Clock                                                                                                                      To Clock                                                                                                                            WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints  
+----------                                                                                                                      ----------                                                                                                                      --------                                                                                                                            -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------  
+**async_default**                                                                                                               DB0_ADC_DCLK                                                                                                                    DB0_ADC_DCLK                                                                                                                          0.775        0.000                      0                   94        1.081        0.000                      0                   94  
+**async_default**                                                                                                               DB1_ADC_DCLK                                                                                                                    DB1_ADC_DCLK                                                                                                                          1.399        0.000                      0                   94        0.638        0.000                      0                   94  
+**async_default**                                                                                                               FPGA_REFCLK                                                                                                                     FPGA_REFCLK                                                                                                                          29.706        0.000                      0                   87        1.033        0.000                      0                   87  
+**async_default**                                                                                                               ioport2_clk                                                                                                                     IoPort2Wrapperx/TxClockGenx/TxUseMmcm.ClkOut1Mmcm                                                                                     1.385        0.000                      0                  259        1.541        0.000                      0                  259  
+**async_default**                                                                                                               XG_CLK                                                                                                                          XG_CLK                                                                                                                                1.786        0.000                      0                 1045        0.510        0.000                      0                 1045  
+**async_default**                                                                                                               bus_clk                                                                                                                         bus_clk                                                                                                                               1.819        0.000                      0                 7681        0.158        0.000                      0                 7681  
+**async_default**                                                                                                               bus_clk_div2                                                                                                                    bus_clk_div2                                                                                                                          1.427        0.000                      0                 2277        0.260        0.000                      0                 2277  
+**async_default**                                                                                                               ce_clk                                                                                                                          ce_clk                                                                                                                                1.509        0.000                      0                 3664        0.156        0.000                      0                 3664  
+**async_default**                                                                                                               clkout0                                                                                                                         clkout0                                                                                                                               6.480        0.000                      0                    2        0.639        0.000                      0                    2  
+**async_default**                                                                                                               ddr3_axi_clk                                                                                                                    ddr3_axi_clk                                                                                                                          4.807        0.000                      0                  251        0.243        0.000                      0                  251  
+**async_default**                                                                                                               ddr3_axi_clk_x2                                                                                                                 ddr3_axi_clk_x2                                                                                                                       0.508        0.000                      0                 1129        0.143        0.000                      0                 1129  
+**async_default**                                                                                                               ioport2_clk                                                                                                                     ioport2_clk                                                                                                                           1.936        0.000                      0                 6205        0.112        0.000                      0                 6205  
+**async_default**                                                                                                               radio_clk                                                                                                                       radio_clk                                                                                                                             0.335        0.000                      0                 2963        0.151        0.000                      0                 2963  
+**async_default**                                                                                                               rio40_clk                                                                                                                       rio40_clk                                                                                                                            23.500        0.000                      0                   48        0.255        0.000                      0                   48  
+**async_default**                                                                                                               sfpp_io_i1/ten_gige_phy_i/ten_gig_eth_pcs_pma_i/inst/gt0_gtwizard_10gbaser_multi_gt_i/gt0_gtwizard_10gbaser_i/gtxe2_i/TXOUTCLK  sfpp_io_i1/ten_gige_phy_i/ten_gig_eth_pcs_pma_i/inst/gt0_gtwizard_10gbaser_multi_gt_i/gt0_gtwizard_10gbaser_i/gtxe2_i/TXOUTCLK        2.204        0.000                      0                    1        0.318        0.000                      0                    1  
+**default**                                                                                                                     bus_clk                                                                                                                                                                                                                                                               5.254        0.000                      0                    6                                                                        
+**default**                                                                                                                     bus_clk_div2                                                                                                                                                                                                                                                          2.377        0.000                      0                    3                                                                        
+**default**                                                                                                                     ddr3_axi_clk                                                                                                                                                                                                                                                          2.967        0.000                      0                    2                                                                        
+**default**                                                                                                                     input port clock                                                                                                                                                                                                                                                      2.431        0.000                      0                    1                                                                        
+**default**                                                                                                                     ioport2_clk                                                                                                                                                                                                                                                           5.141        0.000                      0                    3                                                                        
+**default**                                                                                                                     radio_clk                                                                                                                                                                                                                                                             0.460        0.000                      0                  102                                                                        
+
+

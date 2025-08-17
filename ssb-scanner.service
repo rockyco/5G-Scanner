@@ -5,9 +5,9 @@ After=network.target
 [Service]
 Type=simple
 User=user
-WorkingDirectory=/home/user/Projects/NR5G/AppUI
-Environment="PATH=/home/user/Projects/NR5G/AppUI/venv/bin:/usr/local/bin:/usr/bin:/bin"
-ExecStart=/home/user/Projects/NR5G/AppUI/venv/bin/python /home/user/Projects/NR5G/AppUI/app.py
+WorkingDirectory=/home/user/Projects/5G-Scanner
+Environment="PATH=/home/user/Projects/5G-Scanner/venv/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/home/user/Projects/5G-Scanner/venv/bin/python /home/user/Projects/5G-Scanner/app.py
 Restart=on-failure
 RestartSec=10
 
