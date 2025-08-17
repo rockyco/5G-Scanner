@@ -1,0 +1,26 @@
+{
+  "usrp": {
+    "executable_path": "/home/user/Projects/NR5G/rfnoc_detectSSB/build/apps/init_ssb_block",
+    "default_args": "type=x300",
+    "default_gain": 30,
+    "default_ddc_rate": 7680000,
+    "default_rx_sig_length": 7680000,
+    "timeout_seconds": 60,
+    "retry_attempts": 2
+  },
+  "paths": {
+    "data_directory": "/home/user/Projects/NR5G/AppUI/data",
+    "log_directory": "/home/user/Projects/NR5G/AppUI/logs",
+    "temp_directory": "/tmp/ssb_scanner"
+  },
+  "scanning": {
+    "gscn_step_size": 1,
+    "max_frequencies_per_band": 341,
+    "parallel_scans": false
+  },
+  "ui": {
+    "default_band": "n78",
+    "refresh_interval_ms": 1000,
+    "max_log_entries": 1000
+  }
+}

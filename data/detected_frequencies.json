@@ -1,0 +1,28 @@
+{
+  "n78": [
+    {
+      "gscn": 7846,
+      "frequency": 3499680000.0,
+      "ssb_count": 150,
+      "scs": 30
+    },
+    {
+      "gscn": 7905,
+      "frequency": 3584640000.0,
+      "ssb_count": 50,
+      "scs": 30
+    },
+    {
+      "gscn": 7951,
+      "frequency": 3650880000.0,
+      "ssb_count": 303,
+      "scs": 30
+    },
+    {
+      "gscn": 8048,
+      "frequency": 3790560000.0,
+      "ssb_count": 164,
+      "scs": 30
+    }
+  ]
+}

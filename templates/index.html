@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5G NR SSB Signal Scanner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background-color: #2196F3;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 968px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #2196F3;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2196F3;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+        
+        .btn-primary {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1976D2;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        }
+        
+        .btn-danger {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .status-panel {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .status-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .status-label {
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .status-value {
+            font-weight: 600;
+        }
+        
+        .status-idle {
+            color: #666;
+        }
+        
+        .status-scanning {
+            color: #ff9800;
+        }
+        
+        .status-completed {
+            color: #4caf50;
+        }
+        
+        .status-stopped {
+            color: #f44336;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background-color: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2196F3 0%, #64B5F6 100%);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .log-container {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 6px;
+            height: 400px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+        }
+        
+        .log-success {
+            color: #4ec9b0;
+        }
+        
+        .log-error {
+            color: #f48771;
+        }
+        
+        .log-warning {
+            color: #dcdcaa;
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .results-table th,
+        .results-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .results-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .results-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .frequency-info {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 6px 6px 0;
+        }
+        
+        .frequency-info h3 {
+            color: #1976D2;
+            margin-bottom: 10px;
+        }
+        
+        .frequency-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .frequency-item {
+            background-color: white;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+        
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2196F3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        
+        .alert-info {
+            background-color: #e3f2fd;
+            color: #1565c0;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .alert-success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .alert-error {
+            background-color: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>5G NR SSB Signal Scanner</h1>
+            <p>USRP X310 Software Defined Radio Interface</p>
+        </div>
+        
+        <div class="main-grid">
+            <!-- Band Configuration Panel -->
+            <div class="card">
+                <h2>Band Configuration</h2>
+                
+                <form id="scanForm">
+                    <div class="form-group">
+                        <label for="bandSelect">5G NR Band</label>
+                        <select id="bandSelect" name="band" required>
+                            <option value="">Select a band...</option>
+                        </select>
+                    </div>
+                    
+                    <div id="frequencyInfo" class="frequency-info" style="display: none;">
+                        <h3>Band Information</h3>
+                        <div id="bandDetails"></div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="rxSigLength">RX Signal Length</label>
+                            <input type="number" id="rxSigLength" name="rx_sig_length" value="7680000" min="1000000" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="gain">Gain (dB)</label>
+                            <input type="number" id="gain" name="gain" value="30" min="0" max="50" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="filePath">Save Directory</label>
+                        <input type="text" id="filePath" name="file_path" value="/home/user/Projects/NR5G/AppUI/data" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary" id="startBtn">
+                            Start Scanning
+                        </button>
+                        <button type="button" class="btn btn-danger" id="stopBtn" disabled>
+                            Stop Scanning
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Device Configuration Section -->
+                <hr style="margin: 30px 0;">
+                <h2>Device Configuration</h2>
+                <form id="configForm">
+                    <div class="form-group">
+                        <label for="usrpExecutable">USRP Executable Path</label>
+                        <input type="text" id="usrpExecutable" name="usrp_executable" placeholder="/path/to/init_ssb_block" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="usrpArgs">USRP Arguments</label>
+                            <input type="text" id="usrpArgs" name="usrp_args" placeholder="type=x300,addr=192.168.40.2">
+                        </div>
+                        <div class="form-group">
+                            <label for="maxFrequencies">Max Frequencies per Band</label>
+                            <input type="number" id="maxFrequencies" name="max_frequencies" value="50" min="1" max="500">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Save Configuration</button>
+                        <button type="button" class="btn btn-primary" id="validateBtn">Validate Config</button>
+                    </div>
+                </form>
+
+                <!-- Single Frequency Test -->
+                <hr style="margin: 30px 0;">
+                <h2>Single Frequency Test</h2>
+                <form id="singleFreqForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="singleFreq">Frequency (Hz)</label>
+                            <input type="number" id="singleFreq" name="frequency" value="3499680000" step="1000" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="testUsrpArgs">USRP Args (optional)</label>
+                            <input type="text" id="testUsrpArgs" name="usrp_args" placeholder="Leave empty to use default">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="testBtn">
+                        Test Frequency
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Status Panel -->
+            <div class="card">
+                <h2>Scan Status</h2>
+                
+                <div class="status-panel">
+                    <div class="status-item">
+                        <span class="status-label">Status:</span>
+                        <span class="status-value" id="statusText">Idle</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Current Frequency:</span>
+                        <span class="status-value" id="currentFreq">-</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Frequencies Scanned:</span>
+                        <span class="status-value" id="freqScanned">0</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">SSB Detected:</span>
+                        <span class="status-value" id="ssbDetected">0</span>
+                    </div>
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar" style="width: 0%">0%</div>
+                </div>
+                
+                <h2>Detection Results</h2>
+                <div id="resultsContainer">
+                    <p style="color: #666;">No results yet. Start scanning to detect SSB signals.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Detected Frequencies Panel -->
+        <div class="card">
+            <h2>Detected Frequencies</h2>
+            <div id="detectedFrequencies">
+                <p style="color: #666;">No frequencies detected yet. Complete a band scan to see results.</p>
+            </div>
+        </div>
+        
+        <!-- Data Capture Panel -->
+        <div class="card">
+            <h2>Long-Duration Data Capture</h2>
+            <form id="captureForm">
+                <div class="form-group">
+                    <label>Frequency Source</label>
+                    <select id="frequencySource" onchange="toggleFrequencyInput()">
+                        <option value="detected">From Detected Frequencies</option>
+                        <option value="custom">Custom Input</option>
+                    </select>
+                </div>
+                
+                <div id="detectedFreqGroup" class="form-group">
+                    <label for="captureGscn">Selected Frequency</label>
+                    <select id="captureGscn" name="gscn" required>
+                        <option value="">Select a detected frequency...</option>
+                    </select>
+                </div>
+                
+                <div id="customFreqGroup" class="form-group" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="customBand">Band</label>
+                            <select id="customBand" onchange="calculateFrequencyFromGscn()">
+                                <option value="">Select Band...</option>
+                                <option value="n1">n1 (2100 MHz)</option>
+                                <option value="n3">n3 (1800 MHz)</option>
+                                <option value="n7">n7 (2600 MHz)</option>
+                                <option value="n8">n8 (900 MHz)</option>
+                                <option value="n20">n20 (800 MHz)</option>
+                                <option value="n28">n28 (700 MHz)</option>
+                                <option value="n40">n40 (2300 MHz)</option>
+                                <option value="n78">n78 (3500 MHz)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="customGscn">GSCN</label>
+                            <input type="number" id="customGscn" placeholder="e.g., 5915" min="0" onchange="calculateFrequencyFromGscn()">
+                        </div>
+                        <div class="form-group">
+                            <label for="customFrequency">Frequency (Hz)</label>
+                            <input type="number" id="customFrequency" placeholder="e.g., 2366450000" min="0" onchange="calculateGscnFromFrequency()">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="durationMinutes">Duration per File (minutes)</label>
+                        <input type="number" id="durationMinutes" name="duration_minutes" value="10" min="1" max="60" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="numFiles">Number of Files</label>
+                        <input type="number" id="numFiles" name="num_files" value="5" min="1" max="100" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" id="startCaptureBtn">
+                        Start Data Capture
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Log Panel -->
+        <div class="card">
+            <h2>Live Log</h2>
+            <div class="log-container" id="logContainer"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Global variables
+        let scanInterval = null;
+        let bands = {};
+        let userHasScrolled = false;
+        let detectedFrequencies = {};
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadConfig();
+            await loadBands();
+            setupEventListeners();
+            updateStatus(); // Fetch initial status to sync with backend
+        });
+
+        // Load configuration from the server
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+                document.getElementById('usrpExecutable').value = config.usrp_executable || '';
+                document.getElementById('usrpArgs').value = config.default_args || '';
+                document.getElementById('maxFrequencies').value = config.scanning?.max_frequencies_per_band || 50;
+                document.getElementById('filePath').value = config.data_directory || '';
+                document.getElementById('gain').value = config.default_gain || 30;
+                document.getElementById('rxSigLength').value = config.default_rx_sig_length || 7680000;
+            } catch (error) {
+                addLog('Error loading configuration: ' + error.message, 'error');
+            }
+        }
+
+        // Load available 5G NR bands
+        async function loadBands() {
+            try {
+                const response = await fetch('/api/bands');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                bands = await response.json();
+                const bandSelect = document.getElementById('bandSelect');
+                
+                // Clear previous options before adding new ones
+                bandSelect.innerHTML = '<option value="">Select a band...</option>';
+
+                if (Object.keys(bands).length === 0) {
+                    addLog('No bands loaded from server. Using fallback.', 'warning');
+                    const option = document.createElement('option');
+                    option.value = 'n78';
+                    option.textContent = 'n78 (Fallback)';
+                    bandSelect.appendChild(option);
+                } else {
+                    for (const bandName in bands) {
+                        const option = document.createElement('option');
+                        option.value = bandName;
+                        option.textContent = `${bands[bandName].name}`;
+                        bandSelect.appendChild(option);
+                    }
+                }
+            } catch (error) {
+                addLog(`Failed to load bands: ${error.message}`, 'error');
+                const bandSelect = document.getElementById('bandSelect');
+                // Ensure dropdown is clean even on error
+                bandSelect.innerHTML = '<option value="">Select a band...</option>';
+                const option = document.createElement('option');
+                option.value = 'n78';
+                option.textContent = 'n78 (Fallback)';
+                bandSelect.appendChild(option);
+            }
+        }
+
+        // Set up all event listeners for UI elements
+        function setupEventListeners() {
+            document.getElementById('scanForm').addEventListener('submit', handleScanFormSubmit);
+            document.getElementById('stopBtn').addEventListener('click', stopScan);
+            document.getElementById('configForm').addEventListener('submit', saveConfig);
+            document.getElementById('validateBtn').addEventListener('click', validateConfig);
+            document.getElementById('singleFreqForm').addEventListener('submit', testSingleFrequency);
+            document.getElementById('bandSelect').addEventListener('change', updateBandInfo);
+            document.getElementById('captureForm').addEventListener('submit', startDataCapture);
+            
+            const logContainer = document.getElementById('logContainer');
+            logContainer.addEventListener('scroll', () => {
+                // Detect if user has scrolled up manually to prevent auto-scrolling
+                if (logContainer.scrollTop + logContainer.clientHeight < logContainer.scrollHeight - 15) {
+                    userHasScrolled = true;
+                } else {
+                    userHasScrolled = false;
+                }
+            });
+        }
+
+        // Handle the main scan form submission
+        async function handleScanFormSubmit(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+            try {
+                const response = await fetch('/api/scan/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (response.ok) {
+                    addLog('Scan started successfully.', 'success');
+                    updateStatus(); // Immediately start polling
+                } else {
+                    const error = await response.json();
+                    addLog(`Error starting scan: ${error.error}`, 'error');
+                }
+            } catch (error) {
+                addLog('Failed to send start scan request: ' + error.message, 'error');
+            }
+        }
+
+        // Send a request to stop the current scan
+        async function stopScan() {
+            try {
+                const response = await fetch('/api/scan/stop', { method: 'POST' });
+                if (response.ok) {
+                    addLog('Scan stop request sent.', 'warning');
+                } else {
+                    const error = await response.json();
+                    addLog(`Error stopping scan: ${error.error}`, 'error');
+                }
+            } catch (error) {
+                addLog('Failed to send stop scan request: ' + error.message, 'error');
+            }
+        }
+
+        // Save the main configuration
+        async function saveConfig(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = {
+                usrp_executable: formData.get('usrp_executable'),
+                default_args: formData.get('usrp_args'),
+                scanning: { max_frequencies_per_band: parseInt(formData.get('max_frequencies')) },
+                data_directory: document.getElementById('filePath').value,
+                default_gain: parseInt(document.getElementById('gain').value),
+                default_rx_sig_length: parseInt(document.getElementById('rxSigLength').value)
+            };
+            try {
+                const response = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (response.ok) {
+                    addLog('Configuration saved successfully.', 'success');
+                } else {
+                    const error = await response.json();
+                    addLog(`Error saving configuration: ${error.error}`, 'error');
+                }
+            } catch (error) {
+                addLog('Failed to save configuration: ' + error.message, 'error');
+            }
+        }
+
+        // Validate the current configuration
+        async function validateConfig() {
+            addLog('Validating configuration...');
+            const usrpExecutable = document.getElementById('usrpExecutable').value;
+            try {
+                const response = await fetch('/api/validate', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usrp_executable: usrpExecutable })
+                });
+                const result = await response.json();
+                if (result.is_valid) {
+                    addLog(`Validation successful: ${result.message}`, 'success');
+                } else {
+                    addLog(`Validation failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                addLog('Failed to send validation request: ' + error.message, 'error');
+            }
+        }
+
+        // Test a single frequency
+        async function testSingleFrequency(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = {
+                frequency: parseInt(formData.get('frequency')),
+                gain: parseInt(document.getElementById('gain').value),
+                rx_sig_length: parseInt(document.getElementById('rxSigLength').value),
+                file_path: document.getElementById('filePath').value,
+                usrp_args: formData.get('usrp_args') || undefined
+            };
+            addLog(`Testing frequency: ${data.frequency / 1e9} GHz...`);
+            try {
+                const response = await fetch('/api/scan/single', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    addLog(`Test successful: ${result.message}`, 'success');
+                } else {
+                    addLog(`Test failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                addLog('Failed to send single frequency test: ' + error.message, 'error');
+            }
+        }
+
+        // Calculate frequency from GSCN input using band-specific parameters
+        async function calculateFrequencyFromGscn() {
+            const gscn = parseInt(document.getElementById('customGscn').value);
+            const band = document.getElementById('customBand').value;
+            
+            if (gscn && gscn > 0 && band) {
+                try {
+                    // Get band-specific frequencies from the server
+                    const response = await fetch(`/api/gscn/${band}`);
+                    const bandData = await response.json();
+                    
+                    // Find the frequency for this GSCN
+                    const freqData = bandData.frequencies.find(f => f.gscn === gscn);
+                    if (freqData) {
+                        document.getElementById('customFrequency').value = freqData.frequency;
+                    } else {
+                        // Fallback to generic calculation if GSCN not found
+                        const frequency = (3000 + gscn * 1.44) * 1e6;
+                        document.getElementById('customFrequency').value = Math.round(frequency);
+                    }
+                } catch (error) {
+                    console.error('Error calculating frequency:', error);
+                    // Fallback to generic calculation
+                    const frequency = (3000 + gscn * 1.44) * 1e6;
+                    document.getElementById('customFrequency').value = Math.round(frequency);
+                }
+            }
+        }
+
+        // Calculate GSCN from frequency input using band-specific parameters
+        async function calculateGscnFromFrequency() {
+            const frequency = parseFloat(document.getElementById('customFrequency').value);
+            const band = document.getElementById('customBand').value;
+            
+            if (frequency && frequency > 0 && band) {
+                try {
+                    // Get band-specific frequencies from the server
+                    const response = await fetch(`/api/gscn/${band}`);
+                    const bandData = await response.json();
+                    
+                    // Find the closest GSCN for this frequency
+                    let closestGscn = null;
+                    let minDiff = Infinity;
+                    
+                    for (const freqData of bandData.frequencies) {
+                        const diff = Math.abs(freqData.frequency - frequency);
+                        if (diff < minDiff) {
+                            minDiff = diff;
+                            closestGscn = freqData.gscn;
+                        }
+                    }
+                    
+                    if (closestGscn !== null) {
+                        document.getElementById('customGscn').value = closestGscn;
+                    } else {
+                        // Fallback to generic calculation
+                        const freqMHz = frequency / 1e6;
+                        const gscn = Math.round((freqMHz - 3000) / 1.44);
+                        if (gscn >= 0) {
+                            document.getElementById('customGscn').value = gscn;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error calculating GSCN:', error);
+                    // Fallback to generic calculation
+                    const freqMHz = frequency / 1e6;
+                    const gscn = Math.round((freqMHz - 3000) / 1.44);
+                    if (gscn >= 0) {
+                        document.getElementById('customGscn').value = gscn;
+                    }
+                }
+            }
+        }
+
+        // Toggle between detected and custom frequency input
+        function toggleFrequencyInput() {
+            const source = document.getElementById('frequencySource').value;
+            const detectedGroup = document.getElementById('detectedFreqGroup');
+            const customGroup = document.getElementById('customFreqGroup');
+            
+            if (source === 'custom') {
+                detectedGroup.style.display = 'none';
+                customGroup.style.display = 'block';
+                document.getElementById('captureGscn').required = false;
+                document.getElementById('customBand').required = true;
+                document.getElementById('customGscn').required = false;
+                document.getElementById('customFrequency').required = false;
+            } else {
+                detectedGroup.style.display = 'block';
+                customGroup.style.display = 'none';
+                document.getElementById('captureGscn').required = true;
+                document.getElementById('customBand').required = false;
+                document.getElementById('customGscn').required = false;
+                document.getElementById('customFrequency').required = false;
+            }
+        }
+
+        // Start data capture for selected frequency
+        async function startDataCapture(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            
+            let gscn, frequency;
+            const source = document.getElementById('frequencySource').value;
+            
+            if (source === 'custom') {
+                const band = document.getElementById('customBand').value;
+                gscn = document.getElementById('customGscn').value;
+                frequency = parseFloat(document.getElementById('customFrequency').value);
+                
+                if (!band) {
+                    addLog('Please select a band for custom input', 'error');
+                    return;
+                }
+                
+                if (!gscn && !frequency) {
+                    addLog('Please enter either GSCN or frequency for custom input', 'error');
+                    return;
+                }
+                
+                // If only GSCN provided, calculate frequency
+                if (gscn && !frequency) {
+                    await calculateFrequencyFromGscn();
+                    frequency = parseFloat(document.getElementById('customFrequency').value);
+                }
+                
+                // If only frequency provided, calculate GSCN
+                if (frequency && !gscn) {
+                    await calculateGscnFromFrequency();
+                    gscn = document.getElementById('customGscn').value;
+                }
+            } else {
+                const selectedValue = formData.get('gscn');
+                if (!selectedValue) {
+                    addLog('Please select a frequency for data capture', 'error');
+                    return;
+                }
+                
+                const freqData = JSON.parse(selectedValue);
+                gscn = freqData.gscn;
+                frequency = freqData.frequency;
+            }
+            
+            const data = {
+                gscn: gscn,
+                frequency: frequency,
+                duration_minutes: parseFloat(formData.get('duration_minutes')),
+                num_files: parseInt(formData.get('num_files')),
+                gain: parseInt(document.getElementById('gain').value)
+            };
+            
+            try {
+                const response = await fetch('/api/capture/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                if (response.ok) {
+                    addLog(`Data capture started: ${result.message}`, 'success');
+                    updateStatus(); // Start polling for log updates
+                } else {
+                    addLog(`Data capture failed: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addLog('Failed to start data capture: ' + error.message, 'error');
+            }
+        }
+
+        // Update detected frequencies display
+        function updateDetectedFrequencies(frequencies) {
+            detectedFrequencies = frequencies;
+            const container = document.getElementById('detectedFrequencies');
+            const select = document.getElementById('captureGscn');
+            
+            // Clear previous options
+            select.innerHTML = '<option value="">Select a detected frequency...</option>';
+            
+            if (!frequencies || Object.keys(frequencies).length === 0) {
+                container.innerHTML = '<p style="color: #666;">No frequencies detected yet. Complete a band scan to see results.</p>';
+                return;
+            }
+            
+            let html = '';
+            for (const [band, freqs] of Object.entries(frequencies)) {
+                if (freqs.length > 0) {
+                    html += `<h4>Band ${band.toUpperCase()}</h4><div class="frequency-list">`;
+                    freqs.forEach(freq => {
+                        html += `<div class="frequency-item">
+                            <strong>GSCN ${freq.gscn}</strong><br>
+                            ${(freq.frequency/1e9).toFixed(5)} GHz<br>
+                            ${freq.ssb_count} SSB blocks
+                        </div>`;
+                        
+                        // Add to select dropdown
+                        const option = document.createElement('option');
+                        option.value = JSON.stringify({
+                            gscn: freq.gscn,
+                            frequency: freq.frequency
+                        });
+                        option.textContent = `${band.toUpperCase()} - GSCN ${freq.gscn} (${(freq.frequency/1e9).toFixed(5)} GHz, ${freq.ssb_count} SSB)`;
+                        select.appendChild(option);
+                    });
+                    html += '</div>';
+                }
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Handle frequency selection for capture
+        document.getElementById('captureGscn').addEventListener('change', function() {
+            const selected = this.value;
+            if (selected) {
+                const freqData = JSON.parse(selected);
+                // Store frequency data in hidden input for form submission
+                const form = document.getElementById('captureForm');
+                let freqInput = form.querySelector('input[name="frequency"]');
+                if (!freqInput) {
+                    freqInput = document.createElement('input');
+                    freqInput.type = 'hidden';
+                    freqInput.name = 'frequency';
+                    form.appendChild(freqInput);
+                }
+                freqInput.value = freqData.frequency;
+            }
+        });
+
+        // Update the band information display when a new band is selected
+        function updateBandInfo() {
+            const selectedBand = document.getElementById('bandSelect').value;
+            const infoDiv = document.getElementById('frequencyInfo');
+            const detailsDiv = document.getElementById('bandDetails');
+            if (selectedBand && bands[selectedBand]) {
+                const band = bands[selectedBand];
+                detailsDiv.innerHTML = `
+                    <p><strong>Max Scannable Frequencies:</strong> ${band.max_frequencies}</p>
+                    <p><strong>Freq Range:</strong> ${band.freq_range_mhz} MHz</p>
+                    <p><strong>SCS:</strong> ${band.scs_khz} kHz</p>
+                    `;
+                infoDiv.style.display = 'block';
+            } else {
+                infoDiv.style.display = 'none';
+            }
+        }
+
+        // Update the entire UI based on the application state
+        function updateUIForState(state, progress = {}) {
+            const isScanning = state === 'scanning' || state === 'starting';
+            
+            document.getElementById('startBtn').disabled = isScanning;
+            document.getElementById('stopBtn').disabled = !isScanning;
+            document.getElementById('testBtn').disabled = isScanning;
+
+            const controls = document.querySelectorAll('#scanForm select, #scanForm input, #configForm input, #singleFreqForm input, #validateBtn');
+            controls.forEach(control => control.disabled = isScanning);
+
+            document.getElementById('statusText').textContent = state.charAt(0).toUpperCase() + state.slice(1);
+            document.getElementById('statusText').className = `status-value status-${state}`;
+            document.getElementById('currentFreq').textContent = progress.current_frequency ? `${(progress.current_frequency / 1e9).toFixed(4)} GHz` : '-';
+            document.getElementById('freqScanned').textContent = `${progress.completed_count || 0} / ${progress.total_count || 0}`;
+            document.getElementById('ssbDetected').textContent = progress.detections || 0;
+
+            const progressFill = document.getElementById('progressBar');
+            const percentage = progress.total_count > 0 ? (progress.completed_count / progress.total_count) * 100 : 0;
+            progressFill.style.width = `${percentage}%`;
+            progressFill.textContent = `${Math.round(percentage)}%`;
+        }
+
+        // A helper to add color to logs based on keywords
+        function formatLogEntry(entry) {
+            let logClass = 'log-info'; // Default class
+            const lowerEntry = entry.toLowerCase();
+            if (lowerEntry.includes('error') || lowerEntry.includes('failed') || lowerEntry.includes('timeout')) {
+                logClass = 'log-error';
+            } else if (lowerEntry.includes('overflow')) {
+                logClass = 'log-warning';
+            } else if (lowerEntry.includes('success') || lowerEntry.includes('detected')) {
+                logClass = 'log-success';
+            }
+            // Sanitize HTML to prevent injection
+            const sanitizedEntry = entry.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            return `<div class="log-entry ${logClass}">${sanitizedEntry}</div>`;
+        }
+
+        // Fetch status from the backend and update the UI
+        async function updateStatus() {
+            try {
+                const response = await fetch('/api/status');
+                if (!response.ok) {
+                    // Don't stop polling for server-side errors, just log and retry
+                    if (response.status >= 500) {
+                        console.warn(`Status update failed with server error: ${response.status}. Retrying.`);
+                        return; 
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                updateUIForState(data.state, data.progress);
+                
+                // Update detected frequencies
+                if (data.detected_frequencies) {
+                    updateDetectedFrequencies(data.detected_frequencies);
+                }
+
+                const logContainer = document.getElementById('logContainer');
+                if (logContainer) {
+                    const newLogHtml = data.log.map(formatLogEntry).join('');
+                    if (logContainer.innerHTML !== newLogHtml) {
+                        logContainer.innerHTML = newLogHtml;
+                        if (!userHasScrolled) {
+                            logContainer.scrollTop = logContainer.scrollHeight;
+                        }
+                    }
+                }
+
+                const resultsContainer = document.getElementById('resultsContainer');
+                if (data.results && data.results.length > 0) {
+                    resultsContainer.innerHTML = createResultsTable(data.results);
+                } else if (data.state === 'completed' && data.log.length > 1) {
+                    resultsContainer.innerHTML = '<p>Scan completed. No SSB signals detected.</p>';
+                }
+
+                const isScanning = data.state === 'scanning' || data.state === 'starting' || data.state === 'data_capture';
+                if (isScanning && !scanInterval) {
+                    scanInterval = setInterval(updateStatus, 1000);
+                } else if (!isScanning && scanInterval) {
+                    clearInterval(scanInterval);
+                    scanInterval = null;
+                }
+            } catch (error) {
+                addLog(`Status update failed: ${error.message}. Polling stopped.`, 'error');
+                if (scanInterval) {
+                    clearInterval(scanInterval);
+                    scanInterval = null;
+                }
+                updateUIForState('error');
+            }
+        }
+
+        // Create the HTML table for scan results
+        function createResultsTable(results) {
+            let tableHtml = `
+                <table class="results-table">
+                    <thead><tr><th>GSCN</th><th>Frequency (GHz)</th><th>Result</th><th>Details</th></tr></thead>
+                    <tbody>`;
+            results.forEach(res => {
+                tableHtml += `
+                    <tr>
+                        <td>${res.gscn}</td>
+                        <td>${(res.freq_hz / 1e9).toFixed(4)}</td>
+                        <td class="log-${res.result_type === 0 ? 'success' : 'error'}">
+                            ${res.result_type === 0 ? 'Success' : (res.result_type === 1 ? 'Timeout' : 'Overflow')}
+                        </td>
+                        <td>${res.message}</td>
+                    </tr>`;
+            });
+            return tableHtml + '</tbody></table>';
+        }
+
+        // Add a log entry to the log container on the UI
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            if (!logContainer) return;
+
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            const timestamp = new Date().toLocaleTimeString([], { hour12: false });
+            entry.innerHTML = `<strong>${timestamp}</strong> - ${message.replace(/</g, "&lt;").replace(/>/g, "&gt;")}`;
+            logContainer.appendChild(entry);
+
+            if (!userHasScrolled) {
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+        }
+    </script>
+</body>
+</html>
