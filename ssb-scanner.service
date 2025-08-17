@@ -1,0 +1,15 @@
+[Unit]
+Description=5G NR SSB Signal Scanner Service
+After=network.target
+
+[Service]
+Type=simple
+User=user
+WorkingDirectory=/home/user/Projects/NR5G/AppUI
+Environment="PATH=/home/user/Projects/NR5G/AppUI/venv/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/home/user/Projects/NR5G/AppUI/venv/bin/python /home/user/Projects/NR5G/AppUI/app.py
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
