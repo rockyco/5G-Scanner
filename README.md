@@ -8,6 +8,26 @@
 
 A sophisticated, modular web-based application for real-time detection and analysis of **5G NR Synchronization Signal Blocks (SSB)** using the **NI USRP X310** Software Defined Radio platform. This production-ready tool enables researchers and engineers to efficiently scan multiple 5G frequency bands and capture long-duration signal data for analysis.
 
+## 📡 Supported 5G NR Bands
+
+```mermaid
+gantt
+    title 5G NR Frequency Bands Coverage
+    dateFormat X
+    axisFormat %d
+    
+    section Low Bands
+    n1 (2110-2170 MHz)    :0, 10
+    n3 (1805-1880 MHz)    :0, 10
+    
+    section Mid Bands
+    n77 (3300-4200 MHz)   :20, 30
+    n78 (3300-3800 MHz)   :20, 25
+    
+    section High Bands
+    n79 (4400-5000 MHz)   :35, 15
+```
+
 ## ✨ Key Features
 
 - 🎯 **Real-time 5G Signal Detection** across multiple NR bands (n1, n3, n77, n78, n79)
@@ -21,18 +41,180 @@ A sophisticated, modular web-based application for real-time detection and analy
 
 ## 🏗️ Architecture Overview
 
+### System Architecture with NI USRP X310
+
+```mermaid
+graph TB
+    subgraph "Host Computer"
+        subgraph "Web Interface"
+            UI[🌐 Web UI<br/>HTML/JS/CSS]
+            API[🔌 REST API<br/>Flask Backend]
+        end
+        
+        subgraph "Core Components"
+            CONFIG[⚙️ Config Manager<br/>config.py]
+            GSCN[📊 GSCN Calculator<br/>gscn_calculator.py]
+            CTRL[📡 USRP Controller<br/>usrp_controller.py]
+        end
+        
+        subgraph "Data Storage"
+            JSON[(📋 Config JSON)]
+            DATA[(📊 Signal Data<br/>*.dat files)]
+            RESULTS[(📈 Results<br/>detected_frequencies.json)]
+        end
+    end
+    
+    subgraph "NI USRP X310 Hardware"
+        subgraph "FPGA"
+            FPGA[💾 Custom FPGA<br/>usrp_x310_fpga_HG.bin]
+            RFNOC[🔧 RFNoC Blocks<br/>SSB Detection]
+        end
+        
+        subgraph "RF Frontend"
+            ANT[📡 Antenna<br/>5G NR Bands]
+            ADC[📊 ADC/DAC<br/>Converters]
+        end
+    end
+    
+    subgraph "5G Network"
+        TOWER[📶 5G Base Station<br/>gNodeB]
+        SSB[📡 SSB Signals<br/>n1/n3/n77/n78/n79]
+    end
+    
+    UI <--> API
+    API <--> CONFIG
+    API <--> GSCN
+    API <--> CTRL
+    CONFIG <--> JSON
+    CTRL <--> DATA
+    CTRL <--> RESULTS
+    CTRL <--> FPGA
+    FPGA <--> RFNOC
+    RFNOC <--> ADC
+    ADC <--> ANT
+    ANT <-.-> SSB
+    SSB <-.-> TOWER
+    
+    style UI fill:#e1f5ff
+    style API fill:#e1f5ff
+    style FPGA fill:#ffe1e1
+    style RFNOC fill:#ffe1e1
+    style TOWER fill:#e1ffe1
+    style SSB fill:#e1ffe1
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Web Frontend  │◄──►│  Flask Backend  │◄──►│  USRP Hardware  │
-│   (HTML/JS/CSS) │    │   (Python API)  │    │    (X310 SDR)   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  Live Logging   │    │ State Management│    │ Signal Detection│
-│  Progress Track │    │ Thread Safety   │    │ Data Capture    │
-│  Results Display│    │ Error Handling  │    │ Process Control │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+
+### Data Flow Architecture
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant WebUI
+    participant Flask
+    participant Controller
+    participant USRP
+    participant 5G_Network
+    
+    User->>WebUI: Select Band & Start Scan
+    WebUI->>Flask: POST /api/scan/start
+    Flask->>Controller: start_scan(band, params)
+    
+    loop For each GSCN frequency
+        Controller->>USRP: init_ssb_block command
+        USRP->>5G_Network: Tune to frequency
+        5G_Network-->>USRP: SSB signals (if present)
+        USRP->>Controller: Detection results
+        Controller->>Flask: Update status
+        Flask->>WebUI: Real-time progress
+        WebUI->>User: Display results
+    end
+    
+    Controller->>Flask: Scan complete
+    Flask->>WebUI: Final results
+    WebUI->>User: Show detected frequencies
+```
+
+### 5G NR Frequency Band Scanning Workflow
+
+```mermaid
+flowchart TD
+    Start([Start Scanning])
+    SelectBand[Select 5G NR Band<br/>n1, n3, n77, n78, n79]
+    CalcGSCN[Calculate GSCN Range<br/>Based on 3GPP TS 38.104]
+    
+    subgraph "Frequency Iteration"
+        GetFreq[Get Next GSCN Frequency]
+        TuneUSRP[Tune USRP to Frequency]
+        Detect{SSB Signal<br/>Detected?}
+        SaveResult[Save Detection Result]
+        UpdateUI[Update Web UI Progress]
+    end
+    
+    MoreFreq{More<br/>Frequencies?}
+    Complete([Scan Complete])
+    
+    Start --> SelectBand
+    SelectBand --> CalcGSCN
+    CalcGSCN --> GetFreq
+    GetFreq --> TuneUSRP
+    TuneUSRP --> Detect
+    Detect -->|Yes| SaveResult
+    Detect -->|No| UpdateUI
+    SaveResult --> UpdateUI
+    UpdateUI --> MoreFreq
+    MoreFreq -->|Yes| GetFreq
+    MoreFreq -->|No| Complete
+    
+    style Start fill:#90EE90
+    style Complete fill:#90EE90
+    style Detect fill:#FFE4B5
+    style SaveResult fill:#87CEEB
+```
+
+### Component Interaction Diagram
+
+```mermaid
+graph LR
+    subgraph "User Interface Layer"
+        HTML[index.html<br/>1120+ lines]
+        JS[JavaScript<br/>Real-time Updates]
+        CSS[Bootstrap CSS<br/>Responsive Design]
+    end
+    
+    subgraph "Application Layer"
+        FLASK[app.py<br/>605 lines<br/>REST API]
+        CONFIG_MGR[config.py<br/>135 lines<br/>Settings Management]
+        GSCN_CALC[gscn_calculator.py<br/>176 lines<br/>Frequency Calculation]
+        USRP_CTRL[usrp_controller.py<br/>301 lines<br/>Hardware Control]
+    end
+    
+    subgraph "Hardware Layer"
+        EXEC[init_ssb_block<br/>RFNoC Application]
+        FPGA_BIN[FPGA Bitstream<br/>Custom Processing]
+        X310[USRP X310<br/>SDR Hardware]
+    end
+    
+    subgraph "Data Layer"
+        CONFIG_JSON[(config.json)]
+        FREQ_JSON[(detected_frequencies.json)]
+        SIGNAL_DATA[(*.dat files)]
+    end
+    
+    HTML <--> JS
+    JS <--> FLASK
+    FLASK --> CONFIG_MGR
+    FLASK --> GSCN_CALC
+    FLASK --> USRP_CTRL
+    CONFIG_MGR <--> CONFIG_JSON
+    USRP_CTRL --> EXEC
+    USRP_CTRL <--> FREQ_JSON
+    USRP_CTRL --> SIGNAL_DATA
+    EXEC --> FPGA_BIN
+    FPGA_BIN --> X310
+    
+    style HTML fill:#e1f5ff
+    style FLASK fill:#e1f5ff
+    style X310 fill:#ffe1e1
+    style FPGA_BIN fill:#ffe1e1
 ```
 
 ## Key Improvements
@@ -117,7 +299,23 @@ Edit the configuration file `config.json` (auto-generated on first run):
 
 > 💡 **Tip**: You can also configure these settings through the web interface after starting the application.
 
-### 3. 🏃 Run Application
+### 3. Flashing the FPGA Image
+
+Flash the generated image to your USRP X310:
+
+```bash
+uhd_image_loader --args "type=x300,addr=192.168.40.2" --fpga-path /home/amd/UTS/5G-Scanner/fpga/usrp_x310_fpga_HG.bin
+```
+
+### 4. Testing the Block on Hardware
+
+Verify the block is recognized by the USRP:
+
+```bash
+uhd_usrp_probe --args "type=x300,addr=192.168.40.2"
+```
+
+### 5. 🏃 Run Application
 
 ```bash
 # Option 1: Using the startup script (recommended)
@@ -127,7 +325,7 @@ Edit the configuration file `config.json` (auto-generated on first run):
 python app.py
 ```
 
-### 4. 🌐 Access Web Interface
+### 6. 🌐 Access Web Interface
 
 Open your browser and navigate to:
 ```
@@ -274,6 +472,100 @@ curl -X POST http://localhost:5000/api/scan/single_freq \
 | **Accuracy** | 99.5% detection rate | With optimal signal conditions |
 | **Reliability** | <1% system crashes | Comprehensive error handling |
 | **Memory Usage** | 50-150MB peak | Scales with log retention |
+
+### Deployment Architecture
+
+```mermaid
+graph TB
+    subgraph "Production Deployment"
+        subgraph "System Services"
+            SYSTEMD[📦 SystemD Service<br/>ssb-scanner.service]
+            VENV[🐍 Python Virtual Env<br/>Isolated Dependencies]
+        end
+        
+        subgraph "Network Configuration"
+            ETH1[🔌 Management Network<br/>Web UI Access]
+            ETH2[🔌 USRP Network<br/>192.168.40.0/24]
+        end
+        
+        subgraph "Storage Layout"
+            PROJ[📁 /home/user/Projects/5G-Scanner<br/>Application Code]
+            DATA[📁 /home/user/data/5g_signals<br/>Captured Data]
+            LOGS[📁 /var/log/ssb-scanner<br/>System Logs]
+        end
+    end
+    
+    subgraph "Hardware Setup"
+        HOST[💻 Host Computer<br/>Ubuntu 20.04+]
+        USRP[📡 USRP X310<br/>10GbE Connection]
+        ANT1[📡 RX Antenna<br/>5G NR Bands]
+    end
+    
+    SYSTEMD --> VENV
+    VENV --> PROJ
+    HOST --> ETH1
+    HOST --> ETH2
+    ETH2 --> USRP
+    USRP --> ANT1
+    PROJ --> DATA
+    SYSTEMD --> LOGS
+    
+    style SYSTEMD fill:#d4e6ff
+    style USRP fill:#ffe4e4
+    style HOST fill:#e4ffe4
+```
+
+### Signal Processing Flow
+
+```mermaid
+flowchart LR
+    subgraph "RF Input"
+        ANT[📡 Antenna<br/>5G NR Signal]
+        LNA[🔊 LNA<br/>Low Noise Amp]
+    end
+    
+    subgraph "USRP X310 Processing"
+        subgraph "Analog Domain"
+            MIX[🔄 Mixer<br/>Downconversion]
+            ADC[📊 ADC<br/>200 MSPS]
+        end
+        
+        subgraph "FPGA Processing"
+            DDC[📉 DDC<br/>Digital Downconvert]
+            SSB_DET[🔍 SSB Detector<br/>RFNoC Block]
+            BUFFER[💾 FIFO Buffer<br/>Data Staging]
+        end
+    end
+    
+    subgraph "Host Processing"
+        DMA[🚀 PCIe/10GbE<br/>Data Transfer]
+        APP[💻 Application<br/>init_ssb_block]
+        DECODE[📊 SSB Decode<br/>Signal Analysis]
+    end
+    
+    subgraph "Results"
+        DETECT[✅ Detection<br/>SSB Found]
+        METRICS[📈 Metrics<br/>RSRP, Count]
+        SAVE[💾 Storage<br/>JSON/DAT Files]
+    end
+    
+    ANT --> LNA
+    LNA --> MIX
+    MIX --> ADC
+    ADC --> DDC
+    DDC --> SSB_DET
+    SSB_DET --> BUFFER
+    BUFFER --> DMA
+    DMA --> APP
+    APP --> DECODE
+    DECODE --> DETECT
+    DETECT --> METRICS
+    METRICS --> SAVE
+    
+    style ANT fill:#ffe4b5
+    style SSB_DET fill:#b5e7ff
+    style DETECT fill:#b5ffb5
+```
 
 ## 📁 Project Structure
 
