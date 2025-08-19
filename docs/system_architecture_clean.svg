@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .host-box { fill: #e1f5ff; stroke: #036; stroke-width: 2; }
+      .hw-box { fill: #ffe1e1; stroke: #600; stroke-width: 2; }
+      .net-box { fill: #e1ffe1; stroke: #063; stroke-width: 2; }
+      .text { font-family: Arial, sans-serif; font-size: 11px; text-anchor: middle; }
+      .title { font-size: 14px; font-weight: bold; }
+      .arrow { stroke: #333; stroke-width: 2; marker-end: url(#arrowhead); }
+      .data-flow { stroke: #0066cc; stroke-width: 2; marker-end: url(#arrowhead-blue); stroke-dasharray: 3,3; }
+      .control-flow { stroke: #cc6600; stroke-width: 2; marker-end: url(#arrowhead-orange); }
+    </style>
+    
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    </marker>
+    <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#0066cc" />
+    </marker>
+    <marker id="arrowhead-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#cc6600" />
+    </marker>
+  </defs>
+  
+  <!-- Host Computer Section -->
+  <rect x="20" y="20" width="280" height="180" class="host-box" rx="10" />
+  <text x="160" y="40" class="text title">Host Computer</text>
+  
+  <!-- Web UI -->
+  <rect x="40" y="60" width="80" height="30" fill="white" stroke="#036" rx="5" />
+  <text x="80" y="80" class="text">Web UI</text>
+  
+  <!-- REST API -->
+  <rect x="140" y="60" width="80" height="30" fill="white" stroke="#036" rx="5" />
+  <text x="180" y="80" class="text">REST API</text>
+  
+  <!-- Config Manager -->
+  <rect x="40" y="110" width="80" height="30" fill="white" stroke="#036" rx="5" />
+  <text x="80" y="130" class="text">config.py</text>
+  
+  <!-- GSCN Calculator -->
+  <rect x="140" y="110" width="80" height="30" fill="white" stroke="#036" rx="5" />
+  <text x="180" y="130" class="text">gscn_calculator.py</text>
+  
+  <!-- USRP Controller -->
+  <rect x="90" y="160" width="100" height="30" fill="white" stroke="#036" rx="5" />
+  <text x="140" y="180" class="text">usrp_controller.py</text>
+  
+  <!-- USRP X310 Hardware Section -->
+  <rect x="320" y="20" width="200" height="180" class="hw-box" rx="10" />
+  <text x="420" y="40" class="text title">NI USRP X310</text>
+  
+  <!-- FPGA -->
+  <rect x="340" y="60" width="80" height="30" fill="white" stroke="#600" rx="5" />
+  <text x="380" y="80" class="text">FPGA</text>
+  
+  <!-- RFNoC -->
+  <rect x="440" y="60" width="80" height="30" fill="white" stroke="#600" rx="5" />
+  <text x="480" y="80" class="text">RFNoC SSB</text>
+  
+  <!-- ADC/DAC -->
+  <rect x="340" y="120" width="80" height="30" fill="white" stroke="#600" rx="5" />
+  <text x="380" y="140" class="text">ADC/DAC</text>
+  
+  <!-- Antenna -->
+  <rect x="440" y="120" width="80" height="30" fill="white" stroke="#600" rx="5" />
+  <text x="480" y="140" class="text">Antenna</text>
+  
+  <!-- 5G Network Section -->
+  <rect x="550" y="20" width="180" height="180" class="net-box" rx="10" />
+  <text x="640" y="40" class="text title">5G Network</text>
+  
+  <!-- SSB Signals -->
+  <ellipse cx="590" cy="80" rx="50" ry="25" fill="white" stroke="#063" stroke-width="2" />
+  <text x="590" y="85" class="text">SSB Signals</text>
+  
+  <!-- gNodeB -->
+  <rect x="590" y="130" width="100" height="40" fill="white" stroke="#063" rx="5" />
+  <text x="640" y="155" class="text">5G Base Station</text>
+  
+  <!-- Data Storage -->
+  <rect x="40" y="230" width="260" height="100" class="host-box" rx="10" />
+  <text x="170" y="250" class="text title">Data Storage</text>
+  
+  <ellipse cx="90" cy="285" rx="40" ry="20" fill="white" stroke="#036" />
+  <text x="90" y="290" class="text">config.json</text>
+  
+  <ellipse cx="170" cy="285" rx="40" ry="20" fill="white" stroke="#036" />
+  <text x="170" y="290" class="text">signal.dat</text>
+  
+  <ellipse cx="250" cy="285" rx="45" ry="20" fill="white" stroke="#036" />
+  <text x="250" y="290" class="text">results.json</text>
+  
+  <!-- Data Flow Arrows -->
+  <!-- UI to API (bidirectional) -->
+  <line x1="120" y1="75" x2="140" y2="75" class="arrow" />
+  <line x1="140" y1="85" x2="120" y2="85" class="arrow" />
+  
+  <!-- API to Components -->
+  <line x1="160" y1="90" x2="100" y2="110" class="control-flow" />
+  <line x1="180" y1="90" x2="180" y2="110" class="control-flow" />
+  <line x1="200" y1="90" x2="140" y2="160" class="control-flow" />
+  
+  <!-- Controller to Hardware -->
+  <line x1="190" y1="175" x2="320" y2="100" class="control-flow" />
+  
+  <!-- Hardware Processing -->
+  <line x1="420" y1="75" x2="440" y2="75" class="arrow" />
+  <line x1="480" y1="90" x2="480" y2="120" class="arrow" />
+  <line x1="420" y1="135" x2="440" y2="135" class="arrow" />
+  
+  <!-- Hardware to 5G Network -->
+  <line x1="520" y1="135" x2="550" y2="100" class="arrow" />
+  <line x1="590" y1="105" x2="620" y2="130" class="arrow" />
+  
+  <!-- Data Storage -->
+  <line x1="80" y1="140" x2="90" y2="265" class="data-flow" />
+  <line x1="140" y1="190" x2="170" y2="265" class="data-flow" />
+  <line x1="160" y1="190" x2="250" y2="265" class="data-flow" />
+  
+  <!-- Hardware Feedback -->
+  <line x1="320" y1="120" x2="190" y2="165" class="data-flow" />
+  
+  <!-- Legend -->
+  <rect x="350" y="250" width="350" height="100" fill="#f8f9fa" stroke="#ddd" stroke-width="1" rx="5" />
+  <text x="525" y="270" class="text title">Data Flow Legend</text>
+  
+  <line x1="370" y1="285" x2="410" y2="285" class="control-flow" />
+  <text x="430" y="290" class="text">Control Commands</text>
+  
+  <line x1="370" y1="305" x2="410" y2="305" class="data-flow" />
+  <text x="430" y="310" class="text">Data Flow</text>
+  
+  <line x1="370" y1="325" x2="410" y2="325" class="arrow" />
+  <text x="430" y="330" class="text">Signal Processing</text>
+  
+  <rect x="550" y="285" width="20" height="15" class="host-box" />
+  <text x="580" y="297" class="text">Host Software</text>
+  
+  <rect x="550" y="305" width="20" height="15" class="hw-box" />
+  <text x="580" y="317" class="text">USRP Hardware</text>
+  
+  <rect x="550" y="325" width="20" height="15" class="net-box" />
+  <text x="580" y="337" class="text">5G Network</text>
+</svg>

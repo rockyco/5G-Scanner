@@ -43,7 +43,19 @@ gantt
 
 ### System Architecture with NI USRP X310
 
-![System Architecture](docs/system_architecture.svg)
+![System Architecture](docs/system_architecture.png)
+
+<!-- Alternative formats for different platforms -->
+<details>
+<summary>Alternative Image Formats (click to expand)</summary>
+
+**For SVG support (vector graphics):**
+- [Clean SVG Version](docs/system_architecture_clean.svg) - Simplified, compatible SVG
+- [Original SVG Version](docs/system_architecture.svg) - Enhanced with detailed styling
+
+**Note:** If the main PNG image above doesn't display properly, try opening one of the SVG links directly or view this README on GitHub.
+
+</details>
 
 <!-- Enhanced Mermaid Version with Professional Styling -->
 <details>
