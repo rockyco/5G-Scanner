@@ -43,65 +43,138 @@ gantt
 
 ### System Architecture with NI USRP X310
 
+![System Architecture](docs/system_architecture.svg)
+
+<!-- Enhanced Mermaid Version with Professional Styling -->
+<details>
+<summary>Interactive Mermaid Diagram (click to expand)</summary>
+
 ```mermaid
-graph TB
-    subgraph "Host Computer"
-        subgraph "Web Interface"
-            UI[🌐 Web UI<br/>HTML/JS/CSS]
-            API[🔌 REST API<br/>Flask Backend]
-        end
-        
-        subgraph "Core Components"
-            CONFIG[⚙️ Config Manager<br/>config.py]
-            GSCN[📊 GSCN Calculator<br/>gscn_calculator.py]
-            CTRL[📡 USRP Controller<br/>usrp_controller.py]
-        end
-        
-        subgraph "Data Storage"
-            JSON[(📋 Config JSON)]
-            DATA[(📊 Signal Data<br/>*.dat files)]
-            RESULTS[(📈 Results<br/>detected_frequencies.json)]
-        end
+flowchart TB
+    subgraph WEB[🌐 Web Interface Layer]
+        direction LR
+        UI[📱 Web UI<br/>HTML/CSS/JavaScript]
+        API[🔌 REST API<br/>Flask Backend]
+        UI <--> API
     end
     
-    subgraph "NI USRP X310 Hardware"
-        subgraph "FPGA"
-            FPGA[💾 Custom FPGA<br/>usrp_x310_fpga_HG.bin]
-            RFNOC[🔧 RFNoC Blocks<br/>SSB Detection]
-        end
+    subgraph CORE[⚙️ Core Application Layer]
+        direction LR
+        CFG[📋 Config Manager<br/>config.py]
+        CALC[📊 GSCN Calculator<br/>gscn_calculator.py]
+        CTRL[🎛️ USRP Controller<br/>usrp_controller.py]
         
-        subgraph "RF Frontend"
-            ANT[📡 Antenna<br/>5G NR Bands]
-            ADC[📊 ADC/DAC<br/>Converters]
-        end
+        CFG <--> CALC
+        CALC <--> CTRL
     end
     
-    subgraph "5G Network"
-        TOWER[📶 5G Base Station<br/>gNodeB]
-        SSB[📡 SSB Signals<br/>n1/n3/n77/n78/n79]
+    subgraph DATA[💾 Data Storage Layer]
+        direction LR
+        JSON[(📄 config.json<br/>Settings)]
+        FREQ[(📈 detected_frequencies.json<br/>Scan Results)]
+        FILES[(📁 *.dat files<br/>Signal Data)]
+        
+        JSON -.-> FREQ
+        FREQ -.-> FILES
     end
     
-    UI <--> API
-    API <--> CONFIG
-    API <--> GSCN
-    API <--> CTRL
-    CONFIG <--> JSON
-    CTRL <--> DATA
-    CTRL <--> RESULTS
-    CTRL <--> FPGA
-    FPGA <--> RFNOC
-    RFNOC <--> ADC
-    ADC <--> ANT
-    ANT <-.-> SSB
-    SSB <-.-> TOWER
+    subgraph HW[🔧 Hardware Layer]
+        direction LR
+        FPGA[💻 FPGA Bitstream<br/>Custom Processing]
+        RFNOC[🔍 RFNoC Blocks<br/>SSB Detection]
+        X310[📡 USRP X310<br/>SDR Platform]
+        
+        FPGA --> RFNOC
+        RFNOC --> X310
+    end
     
-    style UI fill:#e1f5ff
-    style API fill:#e1f5ff
-    style FPGA fill:#ffe1e1
-    style RFNOC fill:#ffe1e1
-    style TOWER fill:#e1ffe1
-    style SSB fill:#e1ffe1
+    subgraph RF[📡 RF & Network Layer]
+        direction LR
+        ANT[📶 Antenna<br/>5G NR Bands]
+        SSB[📊 SSB Signals<br/>n1/n3/n77/n78/n79]
+        GNB[🏢 gNodeB<br/>Base Station]
+        
+        ANT <--> SSB
+        SSB <--> GNB
+    end
+    
+    %% Inter-layer connections
+    WEB --> CORE
+    CORE --> DATA
+    CORE --> HW
+    HW --> RF
+    
+    %% Data flow connections
+    API -.->|Configuration| CFG
+    CTRL -.->|Store Results| FREQ
+    CTRL -.->|Capture Data| FILES
+    CTRL -->|Commands| RFNOC
+    
+    %% Professional color scheme
+    style WEB fill:#e1f5ff,stroke:#0066cc,stroke-width:3px
+    style CORE fill:#fff2e6,stroke:#e67300,stroke-width:3px
+    style DATA fill:#f0f8ff,stroke:#003d82,stroke-width:3px
+    style HW fill:#ffe6e6,stroke:#cc0000,stroke-width:3px
+    style RF fill:#e6ffe6,stroke:#009900,stroke-width:3px
+    
+    %% Component styling
+    style UI fill:#cce7ff,stroke:#0052cc
+    style API fill:#cce7ff,stroke:#0052cc
+    style CFG fill:#ffe6cc,stroke:#cc5200
+    style CALC fill:#ffe6cc,stroke:#cc5200
+    style CTRL fill:#ffe6cc,stroke:#cc5200
+    style FPGA fill:#ffcccc,stroke:#990000
+    style RFNOC fill:#ffcccc,stroke:#990000
+    style X310 fill:#ffcccc,stroke:#990000
+    style ANT fill:#ccffcc,stroke:#006600
+    style SSB fill:#ccffcc,stroke:#006600
+    style GNB fill:#ccffcc,stroke:#006600
 ```
+
+</details>
+
+<details>
+<summary>Text Version (if image not visible)</summary>
+
+```
+**System Architecture Overview:**
+
+┌──────────────────────────────────────────────┐
+│              Host Computer                   │
+├─────────────┬─────────────┬──────────────────┤
+│  Web UI     │  REST API   │  Core Components │
+│ (HTML/JS)   │  (Flask)    │                  │
+├─────────────┼─────────────┼──────────────────┤
+│ config.py   │gscn_calc.py │usrp_controller.py│
+└─────────────┴─────────────┴──────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────────────┐
+│            NI USRP X310                     │
+├─────────────┬─────────────┬─────────────────┤
+│    FPGA     │   RFNoC     │   ADC/DAC       │
+│ Bitstream   │ SSB Detect  │   Antenna       │
+└─────────────┴─────────────┴─────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────────────┐
+│             5G Network                      │
+├─────────────┬─────────────┬─────────────────┤
+│ SSB Signals │  gNodeB     │ NR Frequencies  │
+│(n1/n3/n77/  │             │ (MHz ranges)    │
+│ n78/n79)    │             │                 │
+└─────────────┴─────────────┴─────────────────┘
+
+**Data Flow:** 
+Web UI ↔ Flask API → Python Components → USRP Hardware → 5G Signals
+
+**Storage:**
+- config.json (settings)
+- *.dat files (signal captures) 
+- detected_frequencies.json (scan results)
+```
+
+</details>
 
 ### Data Flow Architecture
 
@@ -519,52 +592,58 @@ graph TB
 
 ```mermaid
 flowchart LR
-    subgraph "RF Input"
+    subgraph RF[🔶 RF Input Chain]
+        direction TB
         ANT[📡 Antenna<br/>5G NR Signal]
         LNA[🔊 LNA<br/>Low Noise Amp]
+        ANT --> LNA
     end
     
-    subgraph "USRP X310 Processing"
-        subgraph "Analog Domain"
-            MIX[🔄 Mixer<br/>Downconversion]
-            ADC[📊 ADC<br/>200 MSPS]
-        end
-        
-        subgraph "FPGA Processing"
-            DDC[📉 DDC<br/>Digital Downconvert]
-            SSB_DET[🔍 SSB Detector<br/>RFNoC Block]
-            BUFFER[💾 FIFO Buffer<br/>Data Staging]
-        end
+    subgraph ANALOG[🔷 Analog Frontend]
+        direction TB
+        MIX[🔄 Mixer<br/>Downconversion]
+        ADC[📊 ADC<br/>200 MSPS]
+        MIX --> ADC
     end
     
-    subgraph "Host Processing"
+    subgraph FPGA[💠 FPGA Processing]
+        direction TB
+        DDC[📉 Digital Downconvert]
+        SSB[🔍 SSB Detector<br/>RFNoC Block]
+        BUF[💾 FIFO Buffer]
+        DDC --> SSB
+        SSB --> BUF
+    end
+    
+    subgraph HOST[🔸 Host Processing]
+        direction TB
         DMA[🚀 PCIe/10GbE<br/>Data Transfer]
-        APP[💻 Application<br/>init_ssb_block]
-        DECODE[📊 SSB Decode<br/>Signal Analysis]
+        APP[💻 init_ssb_block<br/>Application]
+        DEC[📊 SSB Decoder<br/>Signal Analysis]
+        DMA --> APP
+        APP --> DEC
     end
     
-    subgraph "Results"
-        DETECT[✅ Detection<br/>SSB Found]
-        METRICS[📈 Metrics<br/>RSRP, Count]
-        SAVE[💾 Storage<br/>JSON/DAT Files]
+    subgraph RESULTS[🔹 Results & Storage]
+        direction TB
+        DET[✅ SSB Detection<br/>Status & Count]
+        MET[📈 Signal Metrics<br/>RSRP, Quality]
+        SAV[💾 Data Storage<br/>JSON & DAT Files]
+        DET --> MET
+        MET --> SAV
     end
     
-    ANT --> LNA
-    LNA --> MIX
-    MIX --> ADC
-    ADC --> DDC
-    DDC --> SSB_DET
-    SSB_DET --> BUFFER
-    BUFFER --> DMA
-    DMA --> APP
-    APP --> DECODE
-    DECODE --> DETECT
-    DETECT --> METRICS
-    METRICS --> SAVE
+    RF --> ANALOG
+    ANALOG --> FPGA
+    FPGA --> HOST
+    HOST --> RESULTS
     
-    style ANT fill:#ffe4b5
-    style SSB_DET fill:#b5e7ff
-    style DETECT fill:#b5ffb5
+    %% Enhanced styling with consistent color scheme
+    style RF fill:#fff2e6,stroke:#e67300,stroke-width:3px
+    style ANALOG fill:#ffe6e6,stroke:#cc0000,stroke-width:3px
+    style FPGA fill:#e6f3ff,stroke:#0066cc,stroke-width:3px
+    style HOST fill:#f0f8ff,stroke:#003d82,stroke-width:3px
+    style RESULTS fill:#e6ffe6,stroke:#009900,stroke-width:3px
 ```
 
 ## 📁 Project Structure
