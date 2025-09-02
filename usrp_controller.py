@@ -23,24 +23,52 @@ class USRPController:
         self.process_lock = threading.Lock()
     
     def cleanup_processes(self):
-        """Clean up any stray USRP processes"""
+        """Clean up any stray USRP processes with enhanced reliability"""
         try:
             executable_name = Path(self.config.get('usrp.executable_path')).name
+            max_attempts = self.config.get('usrp.max_process_cleanup_attempts', 5)
+            cleanup_delay = self.config.get('usrp.process_cleanup_delay', 2.0)
             
-            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
-                try:
-                    if (proc.info['name'] == executable_name or 
-                        any(executable_name in str(cmd) for cmd in proc.info['cmdline'] or [])):
+            for attempt in range(max_attempts):
+                found_processes = []
+                
+                for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+                    try:
+                        if (proc.info['name'] == executable_name or 
+                            any(executable_name in str(cmd) for cmd in proc.info['cmdline'] or [])):
+                            found_processes.append(proc.info['pid'])
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        continue
+                
+                if not found_processes:
+                    break  # No more processes found
+                
+                # Terminate processes
+                for pid in found_processes:
+                    try:
+                        process = psutil.Process(pid)
+                        if attempt < 2:
+                            process.terminate()  # Graceful termination first
+                        else:
+                            process.kill()  # Force kill on later attempts
                         
-                        process = psutil.Process(proc.info['pid'])
-                        process.terminate()
                         try:
-                            process.wait(timeout=5)
+                            process.wait(timeout=cleanup_delay)
                         except psutil.TimeoutExpired:
-                            process.kill()
+                            if attempt >= 1:  # Force kill if graceful termination failed
+                                try:
+                                    process.kill()
+                                    process.wait(timeout=1)
+                                except:
+                                    pass
                         
-                except (psutil.NoSuchProcess, psutil.AccessDenied):
-                    continue
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        continue
+                
+                # Wait before checking again
+                if found_processes and attempt < max_attempts - 1:
+                    time.sleep(cleanup_delay)
+                    
         except Exception as e:
             print(f"Warning: Error cleaning up processes: {e}")
     
@@ -71,12 +99,7 @@ class USRPController:
             else:
                 command.append(str(part))
         
-        command.append('--setup')
-        command.append('3')
-        # Add setup delay and null output if not already present
-        if '--setup' not in command:
-            command.extend(['--setup', '3'])
-        
+        # Add null output if not already present and no output file specified
         if '--null' not in command and not output_file:
             command.append('--null')
         elif output_file:
@@ -159,15 +182,20 @@ class USRPController:
             if output_file:
                 # For data capture, calculate timeout based on rx_sig_length
                 # rx_sig_length samples at 7.68 MHz = duration in seconds
-                capture_duration = (rx_sig_length / 7680000) + 60  # Add 60s buffer
-                timeout = max(base_timeout, capture_duration)
+                capture_duration = (rx_sig_length / 7680000)
+                # Add significant buffer for long captures: base buffer + 10% of capture time
+                buffer_time = max(120, capture_duration * 0.1)  # Minimum 2 min buffer
+                timeout = max(base_timeout, capture_duration + buffer_time)
+                if log_callback:
+                    log_callback(f"Setting timeout to {timeout:.1f}s for {capture_duration:.1f}s capture")
             else:
                 timeout = base_timeout
             
             try:
-                # Read output line by line in real-time
+                # Read output line by line in real-time with improved monitoring
                 output_lines = []
                 start_time = time.time()
+                last_progress_time = start_time
                 
                 while True:
                     # Check if process has finished
@@ -182,9 +210,21 @@ class USRPController:
                                     output_lines.append(line.strip())
                         break
                     
+                    current_time = time.time()
+                    elapsed_time = current_time - start_time
+                    
                     # Check for timeout
-                    if time.time() - start_time > timeout:
+                    if elapsed_time > timeout:
+                        if log_callback:
+                            log_callback(f"Timeout after {elapsed_time:.1f}s (limit: {timeout:.1f}s)")
                         raise subprocess.TimeoutExpired(command, timeout)
+                    
+                    # Progress monitoring for long captures
+                    if output_file and (current_time - last_progress_time) > 60:  # Every minute
+                        progress_pct = min(100, (elapsed_time / (timeout - 120)) * 100)  # Subtract buffer time
+                        if log_callback:
+                            log_callback(f"Capture progress: {progress_pct:.1f}% ({elapsed_time:.0f}s elapsed)")
+                        last_progress_time = current_time
                     
                     # Read a line (with timeout)
                     line = process.stdout.readline()
@@ -212,7 +252,7 @@ class USRPController:
                                 return {'result_type': 2, 'error': 'Overflow'}
                     
                     # Small sleep to prevent busy waiting
-                    time.sleep(0.01)
+                    time.sleep(0.1)  # Increased slightly for long captures
                 
                 self.current_process = None
                 output = '\n'.join(output_lines)

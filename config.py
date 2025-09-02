@@ -25,7 +25,9 @@ class Config:
                 'default_ddc_rate': 7.68e6,
                 'default_rx_sig_length': 7680000,
                 'timeout_seconds': 60,
-                'retry_attempts': 2
+                'retry_attempts': 3,  # Increased from 2 to 3
+                'max_process_cleanup_attempts': 5,
+                'process_cleanup_delay': 2.0
             },
             'paths': {
                 'data_directory': '/home/user/Projects/5G-Scanner/data',

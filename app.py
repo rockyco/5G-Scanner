@@ -45,6 +45,13 @@ class ScanManager:
         self.scanned_frequencies = set() # Track scanned frequencies
         self.detected_frequencies = {} # Store detected frequencies by band
         self.capture_thread = None
+        self.capture_progress = {
+            'current_file': 0,
+            'total_files': 0,
+            'current_filename': '',
+            'start_time': None,
+            'estimated_completion': None
+        }
         
         # Load persistent detected frequencies
         self.load_detected_frequencies()
@@ -95,9 +102,12 @@ class ScanManager:
             self.status.update(kwargs)
     
     def get_status(self):
-        """Get current status (thread-safe copy)"""
+        """Get current status including capture progress"""
         with self.lock:
-            return self.status.copy()
+            status = self.status.copy()
+            if hasattr(self, 'capture_progress') and self.status['state'] == 'data_capture':
+                status['capture_progress'] = self.capture_progress.copy()
+            return status
     
     def start_scan(self, band, rx_sig_length, gain, usrp_args=None, max_retries=None):
         """Start scanning a band"""
@@ -148,6 +158,16 @@ class ScanManager:
         self.add_log("Scan stop requested")
         
         return True, "Scan stopped"
+    
+    def stop_data_capture(self):
+        """Stop current data capture"""
+        self.stop_requested = True
+        self.usrp.stop_current_scan()
+        
+        self.update_status(state='stopping')
+        self.add_log("Data capture stop requested")
+        
+        return True, "Data capture stopped"
     
     def _scan_band_worker(self, band, rx_sig_length, gain, usrp_args, max_retries):
         """Worker thread for band scanning"""
@@ -357,24 +377,55 @@ class ScanManager:
         if self.capture_thread and self.capture_thread.is_alive():
             return False, "Data capture already in progress"
         
+        # Reset stop flag for new capture operation
+        self.stop_requested = False
+        
         # Calculate rx_sig_length based on duration (7680000 samples per second)
         rx_sig_length = int(7680000 * duration_minutes * 60)
         
+        # Check disk space before starting capture
+        data_dir = Path(config.get('paths.data_directory'))
+        data_dir.mkdir(exist_ok=True)
+        
+        # Estimate required space (assume 16 bytes per sample as safety margin)
+        estimated_size_gb = (rx_sig_length * num_files * 16) / (1024**3)
+        
+        try:
+            free_space_gb = os.statvfs(data_dir).f_bavail * os.statvfs(data_dir).f_frsize / (1024**3)
+            if free_space_gb < estimated_size_gb + 1:  # +1GB buffer
+                return False, f"Insufficient disk space. Need {estimated_size_gb:.1f}GB, have {free_space_gb:.1f}GB"
+        except Exception as e:
+            self.add_log(f"Warning: Could not check disk space: {e}")
+        
+        # Use non-daemon thread for better control
         self.capture_thread = threading.Thread(
             target=self._data_capture_worker,
             args=(gscn, frequency, rx_sig_length, num_files, gain, usrp_args),
-            daemon=True
+            daemon=False  # Changed from True to False for better control
         )
         self.capture_thread.start()
         
         return True, "Data capture started"
     
     def _data_capture_worker(self, gscn, frequency, rx_sig_length, num_files, gain, usrp_args):
-        """Worker thread for data capture"""
+        """Worker thread for data capture with improved stability"""
+        failed_files = []
+        successful_files = 0
+        
         try:
+            self.add_log(f"Data capture worker started - stop_requested: {self.stop_requested}")
             self.update_status(state='data_capture')
             self.add_log(f"Starting data capture for GSCN {gscn} at {frequency/1e9:.5f} GHz")
             self.add_log(f"Capturing {num_files} files, {rx_sig_length/7680000/60:.1f} minutes each")
+            
+            # Initialize progress tracking
+            self.capture_progress = {
+                'current_file': 0,
+                'total_files': num_files,
+                'current_filename': '',
+                'start_time': time.time(),
+                'estimated_completion': None
+            }
             
             data_dir = Path(config.get('paths.data_directory'))
             data_dir.mkdir(exist_ok=True)
@@ -388,12 +439,33 @@ class ScanManager:
                 filename = f"gscn_{gscn}_{frequency/1e6:.1f}MHz_{timestamp}_file{file_num}.dat"
                 output_file = data_dir / filename
                 
+                # Update progress tracking
+                self.capture_progress['current_file'] = file_num
+                self.capture_progress['current_filename'] = filename
+                
+                # Estimate completion time
+                if file_num > 1:
+                    elapsed = time.time() - self.capture_progress['start_time']
+                    avg_time_per_file = elapsed / (file_num - 1)
+                    remaining_files = num_files - file_num + 1
+                    self.capture_progress['estimated_completion'] = time.time() + (avg_time_per_file * remaining_files)
+                
                 self.add_log(f"Capturing file {file_num}/{num_files}: {filename}")
                 
-                # Retry logic for data capture (similar to band scan)
-                for attempt in range(2):  # Max 2 attempts
+                # Enhanced retry logic with exponential backoff
+                max_attempts = 3  # Increased from 2 to 3
+                file_success = False
+                
+                for attempt in range(max_attempts):
                     if self.stop_requested:
                         break
+                    
+                    # Clean up any stray processes before each attempt
+                    if attempt > 0:
+                        self.usrp.cleanup_processes()
+                        wait_time = min(5 * (2 ** (attempt - 1)), 30)  # Exponential backoff, max 30s
+                        self.add_log(f"Waiting {wait_time}s before retry {attempt + 1}/{max_attempts}")
+                        time.sleep(wait_time)
                     
                     result = self.usrp.execute_scan(
                         frequency=frequency,
@@ -406,31 +478,60 @@ class ScanManager:
                     
                     if result['result_type'] == 0:
                         self.add_log(f"Successfully captured file {file_num}: {filename}")
+                        successful_files += 1
+                        file_success = True
                         break  # Success, move to next file
-                    elif attempt == 0 and (result['result_type'] == 1 or 'Could not connect DDC to detectSSB' in result.get('error', '')):
-                        # Retry on first timeout or connection error
-                        self.add_log(f"Data capture failed for file {file_num} (attempt {attempt + 1}), retrying once...")
-                        time.sleep(5)  # Longer wait for connection issues
+                    elif result['result_type'] in [1, -1] or 'Could not connect DDC to detectSSB' in result.get('error', ''):
+                        # Timeout or connection error - can retry
+                        self.add_log(f"Data capture failed for file {file_num} (attempt {attempt + 1}/{max_attempts}): {result.get('error', 'Unknown error')}")
+                        continue
+                    elif result['result_type'] == 2:
+                        # Overflow - may need different approach but can retry
+                        self.add_log(f"Overflow detected for file {file_num} (attempt {attempt + 1}/{max_attempts})")
                         continue
                     else:
-                        # Failed on retry or other error
-                        error_msg = result.get('error', 'Unknown error')
-                        self.add_log(f"Failed to capture file {file_num} after retries: {error_msg}")
-                        return  # Exit data capture on failure
-                    
+                        # Other error
+                        self.add_log(f"Unexpected error for file {file_num} (attempt {attempt + 1}/{max_attempts}): {result.get('error', 'Unknown error')}")
+                        continue
+                
+                if not file_success and not self.stop_requested:
+                    # File failed after all retries - log but continue with next file
+                    failed_files.append(f"file{file_num} ({filename})")
+                    self.add_log(f"File {file_num} failed after {max_attempts} attempts - continuing with next file")
+                
+                # Memory management: Force garbage collection between files
+                import gc
+                gc.collect()
+                
                 if self.stop_requested:
                     break
             
+            # Final status report
             if not self.stop_requested:
-                self.add_log("Data capture completed successfully")
+                if failed_files:
+                    self.add_log(f"Data capture completed with {successful_files}/{num_files} successful files")
+                    self.add_log(f"Failed files: {', '.join(failed_files)}")
+                else:
+                    self.add_log(f"Data capture completed successfully - all {successful_files} files captured")
             else:
-                self.add_log("Data capture stopped by user")
+                self.add_log(f"Data capture stopped by user - captured {successful_files}/{num_files} files")
             
             self.update_status(state='idle')
                 
         except Exception as e:
             self.add_log(f"Data capture error: {e}", 'error')
+            import traceback
+            self.add_log(f"Traceback: {traceback.format_exc()}", 'error')
             self.update_status(state='error')
+        finally:
+            # Ensure cleanup happens regardless of how we exit
+            try:
+                self.usrp.cleanup_processes()
+            except Exception as e:
+                self.add_log(f"Warning: Error during final cleanup: {e}")
+            
+            # Reset capture thread reference
+            self.capture_thread = None
 
 # Global scan manager
 scan_manager = ScanManager()
@@ -528,6 +629,12 @@ def start_scan():
 def stop_scan():
     """Stop the current scan"""
     success, message = scan_manager.stop_scan()
+    return jsonify({'message': message})
+
+@app.route('/api/capture/stop', methods=['POST'])
+def stop_capture():
+    """Stop the current data capture"""
+    success, message = scan_manager.stop_data_capture()
     return jsonify({'message': message})
 
 @app.route('/api/scan/single_freq', methods=['POST'])

@@ -644,18 +644,30 @@
             }
         }
 
-        // Send a request to stop the current scan
+        // Send a request to stop the current operation (scan or data capture)
         async function stopScan() {
             try {
-                const response = await fetch('/api/scan/stop', { method: 'POST' });
+                // Check current state to determine which stop endpoint to use
+                const statusResponse = await fetch('/api/status');
+                const status = await statusResponse.json();
+                
+                let endpoint = '/api/scan/stop';
+                let operationType = 'scan';
+                
+                if (status.state === 'data_capture') {
+                    endpoint = '/api/capture/stop';
+                    operationType = 'data capture';
+                }
+                
+                const response = await fetch(endpoint, { method: 'POST' });
                 if (response.ok) {
-                    addLog('Scan stop request sent.', 'warning');
+                    addLog(`${operationType.charAt(0).toUpperCase() + operationType.slice(1)} stop request sent.`, 'warning');
                 } else {
                     const error = await response.json();
-                    addLog(`Error stopping scan: ${error.error}`, 'error');
+                    addLog(`Error stopping ${operationType}: ${error.error}`, 'error');
                 }
             } catch (error) {
-                addLog('Failed to send stop scan request: ' + error.message, 'error');
+                addLog('Failed to send stop request: ' + error.message, 'error');
             }
         }
 
@@ -988,13 +1000,23 @@
         // Update the entire UI based on the application state
         function updateUIForState(state, progress = {}) {
             const isScanning = state === 'scanning' || state === 'starting';
+            const isCapturing = state === 'data_capture';
+            const isActive = isScanning || isCapturing;
             
-            document.getElementById('startBtn').disabled = isScanning;
-            document.getElementById('stopBtn').disabled = !isScanning;
-            document.getElementById('testBtn').disabled = isScanning;
+            document.getElementById('startBtn').disabled = isActive;
+            document.getElementById('stopBtn').disabled = !isActive;
+            document.getElementById('testBtn').disabled = isActive;
+            
+            // Update stop button text based on operation type
+            const stopBtn = document.getElementById('stopBtn');
+            if (isCapturing) {
+                stopBtn.textContent = 'Stop Data Capture';
+            } else {
+                stopBtn.textContent = 'Stop Scanning';
+            }
 
             const controls = document.querySelectorAll('#scanForm select, #scanForm input, #configForm input, #singleFreqForm input, #validateBtn');
-            controls.forEach(control => control.disabled = isScanning);
+            controls.forEach(control => control.disabled = isActive);
 
             document.getElementById('statusText').textContent = state.charAt(0).toUpperCase() + state.slice(1);
             document.getElementById('statusText').className = `status-value status-${state}`;
